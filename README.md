@@ -31,6 +31,7 @@ TBA
 If you have VTK built in a non-standard path, before running qmake, please set the following environment variables:
 
 VTK_7_INCLUDE_PATH=/your/remote/location/include/vtk-7.1
+
 VTK_7_LIBRARY_PATH=/your/remote/location/lib
 
 Any other usage that you might give to this software is welcomed and I hope 
