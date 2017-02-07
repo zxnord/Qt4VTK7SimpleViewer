@@ -23,6 +23,7 @@
 #ifndef PLOTHD_H
 #define PLOTHD_H
 
+#include <QEvent>
 #include <QWidget>
 
 #include <vtkSmartPointer.h>
@@ -33,6 +34,7 @@ class Geometry;
 
 class QVTKWidget2;
 class vtkRenderer;
+class vtkTextActor;
 
 class GeometryPartRepresentation;
 
@@ -45,23 +47,76 @@ struct GeometryRepresentation
 class PlotHD : public QWidget
 {
   Q_OBJECT
+
 public:
   explicit PlotHD(QWidget *parent = 0);
   virtual ~PlotHD();
 
   void addGeometry(std::weak_ptr<Geometry> geom);
 
+  std::vector<std::weak_ptr<GeometryRepresentation>> getRepresentations() const;
+
   bool checkPlotDeletion();
+  bool isSelected() const;
 
 signals:
+  void unSelectAllPlotsBut(PlotHD*);
 
 public slots:
+  void unSelectPlot();
+  void selectPlot();
 
 protected:
-  std::vector<std::unique_ptr<GeometryRepresentation>> m_representations;
+  bool m_selected;
 
-  QVTKWidget2* m_renderWidget;
-  vtkSmartPointer<vtkRenderer> m_renderer;
+  std::vector<std::shared_ptr<GeometryRepresentation>> m_representations;
+
+  vtkSmartPointer<vtkTextActor> m_selectedPlotActor;
+  QVTKWidget2*                  m_renderWidget;
+  vtkSmartPointer<vtkRenderer>  m_renderer;
+};
+
+//------------------------------------------------------------------------------
+//--------------------Utility classes: -----------------------------------------
+//------------------------------------------------------------------------------
+
+class SelectPlotEventFilter : public QObject
+{
+  Q_OBJECT
+
+public:
+  explicit SelectPlotEventFilter(PlotHD* plot = 0)
+    :
+    QObject(plot),
+    m_parentPlot(plot)
+  {}
+
+  ~SelectPlotEventFilter() {}
+
+protected:
+  bool eventFilter(QObject* obj, QEvent* ev)
+  {
+    if( ev->type() == QEvent::MouseButtonPress )
+    {
+      if( !m_parentPlot->isSelected() )
+      {
+        m_parentPlot->selectPlot();
+        return true;
+      }
+      else
+      {
+//        m_rendererWindow->mousePressEvent(static_cast<QMouseEvent>(ev));
+        return QObject::eventFilter(obj, ev);
+      }
+    }
+    else
+    {
+      return QObject::eventFilter(obj, ev);
+    }
+  }
+
+private:
+  PlotHD* m_parentPlot;
 };
 
 #endif // PLOTHD_H

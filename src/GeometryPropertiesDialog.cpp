@@ -19,88 +19,67 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
-#include "GeometryPart.h"
+#include "./src/GeometryPropertiesDialog.h"
+#include "ui_GeometryPropertiesDialog.h"
 
-#include <vtkAlgorithmOutput.h>
-#include <vtkPassThrough.h>
-#include <vtkPolyData.h>
-#include <vtkUnstructuredGrid.h>
+#include "Geometry.h"
 
 //------------------------------------------------------------------------------
 
-GeometryPart::GeometryPart(const QString& name)
-  :
-  m_partName(name),
-  m_inputFilter( vtkSmartPointer<vtkPassThrough>::New() )
+GeometryPropertiesDialog::GeometryPropertiesDialog(QWidget *parent) :
+  QDialog(parent),
+  m_ui(new Ui::GeometryPropertiesDialog)
 {
+  m_ui->setupUi(this);
 }
 
 //------------------------------------------------------------------------------
 
-vtkAlgorithmOutput* GeometryPart::getGeometryPort()
+GeometryPropertiesDialog::~GeometryPropertiesDialog()
 {
-  return m_inputFilter->GetOutputPort();
+  delete m_ui;
 }
 
 //------------------------------------------------------------------------------
 
-vtkDataSet* GeometryPart::getGeometryData()
+void GeometryPropertiesDialog::setCurrentGeometryList(
+  std::vector<std::weak_ptr<GeometryRepresentation>>& geometries)
 {
-  return vtkDataSet::SafeDownCast( m_inputFilter->GetOutput() );
-}
-
-//------------------------------------------------------------------------------
-
-void GeometryPart::setGeometryData(vtkDataSet* data)
-{
-  if( data )
+  if( geometries.empty() )
   {
-    if( auto uGrid = vtkUnstructuredGrid::SafeDownCast(data) )
+    return;
+  }
+
+  m_geometriesRepresentation = geometries;
+  std::weak_ptr<GeometryRepresentation> mainGeom =
+    m_geometriesRepresentation[0];
+
+  for( auto weakGeomRep : m_geometriesRepresentation )
+  {
+    if( auto validGeomRep = weakGeomRep.lock() )
     {
-      m_data = vtkSmartPointer<vtkUnstructuredGrid>::New();
-
-      m_data->ShallowCopy(uGrid);
+      if( auto validGeom = validGeomRep->m_geometry.lock() )
+      {
+        m_ui->m_geometriesCombo->addItem(validGeom->getName());
+      }
     }
-    else if( auto pData = vtkPolyData::SafeDownCast(data) )
+  }
+
+  if( auto validGeomRep = mainGeom.lock() )
+  {
+    if( validGeomRep->m_geometry.lock() )
     {
-      m_data = vtkSmartPointer<vtkPolyData>::New();
-
-      m_data->ShallowCopy(pData);
+      updateUI(validGeomRep);
     }
-
-    updateData();
   }
 }
 
 //------------------------------------------------------------------------------
 
-void GeometryPart::setGeometryConnection(vtkAlgorithmOutput* port)
+void GeometryPropertiesDialog::updateUI(
+  std::shared_ptr<GeometryRepresentation>& geom)
 {
-  if( m_data )
-  {
-    m_data = vtkSmartPointer<vtkDataSet>();
-  }
 
-  m_inputFilter->SetInputConnection(port);
-  m_inputFilter->Update();
-}
-
-//------------------------------------------------------------------------------
-
-void GeometryPart::updateData()
-{
-  if( m_data )
-  {
-    m_inputFilter->SetInputData(m_data);
-    m_inputFilter->Update();
-  }
-}
-
-//------------------------------------------------------------------------------
-
-const QString& GeometryPart::getPartName() const
-{
-  return m_partName;
 }
 
 //------------------------------------------------------------------------------

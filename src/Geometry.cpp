@@ -65,7 +65,10 @@ void fillDatasetMap(vtkDataSetAttributes* att, QMap<QString, double*>& dataMap)
 
 //------------------------------------------------------------------------------
 
-Geometry::Geometry(QObject *parent) : QObject(parent)
+Geometry::Geometry(const QString& name, QObject *parent)
+  :
+  QObject(parent),
+  m_name(name)
 {
 }
 
@@ -121,6 +124,13 @@ QMap<QString, double*> Geometry::getPointDatasetsInfo() const
 QMap<QString, double*> Geometry::getCellDatasetsInfo() const
 {
   return m_cellDatasetsInfo;
+}
+
+//------------------------------------------------------------------------------
+
+const QString& Geometry::getName() const
+{
+  return m_name;
 }
 
 //------------------------------------------------------------------------------

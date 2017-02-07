@@ -38,7 +38,12 @@
 #include "GeometryFactory.h"
 #include "PlotHD.h"
 
-MainWindow* MainWindow::m_winInstance = nullptr;
+//------------------------------------------------------------------------------
+
+std::unique_ptr<MainWindow> MainWindow::m_winInstance =
+  std::unique_ptr<MainWindow>();
+
+//------------------------------------------------------------------------------
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -49,20 +54,20 @@ MainWindow::MainWindow(QWidget *parent) :
   new QHBoxLayout(m_ui->m_plotsWidget);
 
   connect(
-    m_ui->m_addBtn, SIGNAL(pressed()),
-    this,           SLOT(addPlot()));
+    m_ui->actionNew_Plot, SIGNAL(triggered(bool)),
+    this,                 SLOT(addPlot()));
+
+//  connect(
+//    m_ui->m_removeBtn, SIGNAL(pressed()),
+//    this,              SLOT(removePlot()));
 
   connect(
-    m_ui->m_removeBtn, SIGNAL(pressed()),
-    this,              SLOT(removePlot()));
+    m_ui->actionCube, SIGNAL(triggered(bool)),
+    this,             SLOT(addGeometry()));
 
-  connect(
-    m_ui->m_addGeomBtn, SIGNAL(pressed()),
-    this,               SLOT(addGeometry()));
-
-  connect(
-    m_ui->m_removeGeomBtn, SIGNAL(pressed()),
-    this,                  SLOT(removeGeometry()));
+//  connect(
+//    m_ui->m_removeGeomBtn, SIGNAL(pressed()),
+//    this,                  SLOT(removeGeometry()));
 
   connect(
     m_ui->action_About, SIGNAL(triggered(bool)),
@@ -73,6 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
   addPlot();
 }
 
+//------------------------------------------------------------------------------
+
 MainWindow::~MainWindow()
 {
   delete m_ui;
@@ -80,21 +87,30 @@ MainWindow::~MainWindow()
 //  qDeleteAll(m_plotList);
 }
 
+//------------------------------------------------------------------------------
+
 void MainWindow::addPlot()
 {
-  m_plotList.append(new PlotHD(m_ui->m_plotsWidget));
+  m_plotList.append(std::shared_ptr<PlotHD>( new PlotHD() ));
 
-  m_ui->m_plotsWidget->layout()->addWidget(m_plotList.last());
+  m_ui->m_plotsWidget->layout()->addWidget(m_plotList.last().get());
 
   if( m_geomList.isEmpty() )
   {
     addGeometry();
   }
 
+  connect(
+    m_plotList.last().get(), SIGNAL(unSelectAllPlotsBut(PlotHD*)),
+    this,                    SLOT(updateActivePlot(PlotHD*)) );
+
   m_plotList.last()->addGeometry(m_geomList.last());
+  m_plotList.last()->selectPlot();
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::removePlot()
 {
@@ -110,6 +126,8 @@ void MainWindow::removePlot()
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
 
+//------------------------------------------------------------------------------
+
 void MainWindow::addGeometry()
 {
   std::unique_ptr<Geometry> geom =
@@ -119,6 +137,8 @@ void MainWindow::addGeometry()
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::removeGeometry()
 {
@@ -131,13 +151,17 @@ void MainWindow::removeGeometry()
   m_geomList.last().reset();
   m_geomList.pop_back();
 
-  QVector<PlotHD*> newPlotList;
+  QVector<std::shared_ptr<PlotHD>> newPlotList;
 
-  for( PlotHD* plt : m_plotList )
+  for( std::shared_ptr<PlotHD>& plt : m_plotList )
   {
     if( !plt->checkPlotDeletion() )
     {
       newPlotList << plt;
+    }
+    else
+    {
+      plt.reset();
     }
   }
 
@@ -145,6 +169,8 @@ void MainWindow::removeGeometry()
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::customEvent(QEvent* ev)
 {
@@ -155,24 +181,30 @@ void MainWindow::customEvent(QEvent* ev)
   }
 }
 
-MainWindow& MainWindow::GetWindowInstance()
+//------------------------------------------------------------------------------
+
+std::unique_ptr<MainWindow>& MainWindow::GetWindowInstance()
 {
   if( !m_winInstance )
   {
-    m_winInstance = new MainWindow();
+    m_winInstance = std::unique_ptr<MainWindow>( new MainWindow() );
   }
 
-  return *m_winInstance;
+  return m_winInstance;
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::removeAllPlots()
 {
-  for( PlotHD* plt : m_plotList )
+  for( std::shared_ptr<PlotHD>& plt : m_plotList )
   {
-    delete plt;
+    plt.reset();
   }
   m_plotList.clear();
 }
+
+//------------------------------------------------------------------------------
 
 void MainWindow::removeAllGeometries()
 {
@@ -184,9 +216,26 @@ void MainWindow::removeAllGeometries()
   m_geomList.clear();
 }
 
+//------------------------------------------------------------------------------
+
 void MainWindow::showAboutDialog()
 {
   AboutDialog* dialog = new AboutDialog();
   dialog->setModal(true);
   dialog->show();
 }
+
+//------------------------------------------------------------------------------
+
+void MainWindow::updateActivePlot(PlotHD* activePlt)
+{
+  for( std::shared_ptr<PlotHD>& plt : m_plotList )
+  {
+    if( plt.get() != activePlt )
+    {
+      plt->unSelectPlot();
+    }
+  }
+}
+
+//------------------------------------------------------------------------------

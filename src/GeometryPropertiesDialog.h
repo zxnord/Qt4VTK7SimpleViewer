@@ -19,27 +19,41 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
+#ifndef GEOMETRYPROPERTIESDIALOG_H
+#define GEOMETRYPROPERTIESDIALOG_H
 
-#include "MyVTKApplication.h"
+#include <QDialog>
 
-#include "MainWindow.h"
+#include "PlotHD.h"
 
-MyVTKApplication::MyVTKApplication(int& argc, char** argv, bool isGUI) :
-  QApplication(argc, argv, isGUI)
-{
-  connect(
-    this, SIGNAL(aboutToQuit()),
-    this, SLOT(cleanPlotsOnExit()) );
+//------------------------------------------------------------------------------
+
+namespace Ui {
+  class GeometryPropertiesDialog;
 }
 
+//------------------------------------------------------------------------------
 
-MyVTKApplication::~MyVTKApplication()
+class GeometryPropertiesDialog : public QDialog
 {
-}
+  Q_OBJECT
 
-void MyVTKApplication::cleanPlotsOnExit()
-{
-  std::unique_ptr<MainWindow>& win = MainWindow::GetWindowInstance();
-  win->removeAllPlots();
-  win->removeAllGeometries();
-}
+public:
+  explicit GeometryPropertiesDialog(QWidget* parent = 0);
+  ~GeometryPropertiesDialog();
+
+  void setCurrentGeometryList(std::vector<std::weak_ptr<GeometryRepresentation>>&);
+
+protected slots:
+//  void resetToDefault();
+
+private:
+  void updateUI(std::shared_ptr<GeometryRepresentation>&);
+
+  Ui::GeometryPropertiesDialog* m_ui;
+  std::vector<std::weak_ptr<GeometryRepresentation>> m_geometriesRepresentation;
+};
+
+//------------------------------------------------------------------------------
+
+#endif // GEOMETRYPROPERTIESDIALOG_H

@@ -26,45 +26,7 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="m_addBtn">
-        <property name="text">
-         <string>Add Plot</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="m_removeBtn">
-        <property name="text">
-         <string>Remove Plot</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QPushButton" name="m_addGeomBtn">
-        <property name="text">
-         <string>Add Geom</string>
-        </property>
-       </widget>
-      </item>
       <item>
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
@@ -79,9 +41,9 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="m_removeGeomBtn">
+       <widget class="QPushButton" name="m_propertiesBtn">
         <property name="text">
-         <string>Remove Geom</string>
+         <string>Properties</string>
         </property>
        </widget>
       </item>
@@ -102,6 +64,7 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <addaction name="actionNew_Plot"/>
     <addaction name="action_Exit"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
@@ -110,7 +73,29 @@
     </property>
     <addaction name="action_About"/>
    </widget>
+   <widget class="QMenu" name="menuAdd">
+    <property name="title">
+     <string>&amp;Geometry</string>
+    </property>
+    <widget class="QMenu" name="menuBasic_Geometry">
+     <property name="title">
+      <string>Add &amp;Basic</string>
+     </property>
+     <addaction name="actionCube"/>
+     <addaction name="actionSphere"/>
+    </widget>
+    <addaction name="menuBasic_Geometry"/>
+    <addaction name="actionFrom_File"/>
+   </widget>
+   <widget class="QMenu" name="menu_Window">
+    <property name="title">
+     <string>&amp;Window</string>
+    </property>
+    <addaction name="action_Manage"/>
+   </widget>
    <addaction name="menuHelp"/>
+   <addaction name="menuAdd"/>
+   <addaction name="menu_Window"/>
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -122,6 +107,34 @@
   <action name="action_About">
    <property name="text">
     <string>&amp;About</string>
+   </property>
+  </action>
+  <action name="actionCube">
+   <property name="text">
+    <string>&amp;Cube</string>
+   </property>
+  </action>
+  <action name="actionSphere">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Sphere</string>
+   </property>
+  </action>
+  <action name="actionFrom_File">
+   <property name="text">
+    <string>Add F&amp;rom File...</string>
+   </property>
+  </action>
+  <action name="actionNew_Plot">
+   <property name="text">
+    <string>New &amp;Plot</string>
+   </property>
+  </action>
+  <action name="action_Manage">
+   <property name="text">
+    <string>&amp;Manage...</string>
    </property>
   </action>
  </widget>

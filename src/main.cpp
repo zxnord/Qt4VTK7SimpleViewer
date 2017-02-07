@@ -26,8 +26,8 @@
 int main(int argc, char** argv)
 {
   MyVTKApplication a(argc, argv);
-  MainWindow& w = MainWindow::GetWindowInstance();
-  w.show();
+  std::unique_ptr<MainWindow>& w = MainWindow::GetWindowInstance();
+  w->show();
 
   return a.exec();
 }

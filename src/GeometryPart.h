@@ -33,12 +33,11 @@ class vtkDataSet;
 class GeometryPart
 {
 public:
-  GeometryPart();
+  GeometryPart(const QString& name);
 
   vtkAlgorithmOutput* getGeometryPort();
   vtkDataSet* getGeometryData();
 
-  void setPartName(const QString& name);
   void setGeometryData(vtkDataSet*);
   void setGeometryConnection(vtkAlgorithmOutput*);
 
@@ -47,7 +46,7 @@ public:
 protected:
   void updateData();
 
-  QString m_partName;
+  const QString m_partName;
   vtkSmartPointer<vtkDataSet>     m_data;
   vtkSmartPointer<vtkPassThrough> m_inputFilter;
 };

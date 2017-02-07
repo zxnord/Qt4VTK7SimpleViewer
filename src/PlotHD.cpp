@@ -35,12 +35,17 @@
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
 #include <vtkRenderer.h>
+#include <vtkRenderingFreeTypeModule.h>
+#include <vtkRenderingFreeTypeObjectFactory.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkTextActor.h>
+#include <vtkTextProperty.h>
 
 #include <QVTKWidget2.h>
 
 #include <QApplication>
+#include <QMouseEvent>
 #include <QVBoxLayout>
 
 #include "Geometry.h"
@@ -50,12 +55,20 @@
 
 VTK_MODULE_INIT(vtkRenderingOpenGL2)
 VTK_MODULE_INIT(vtkInteractionStyle)
+VTK_MODULE_INIT(vtkRenderingFreeType)
 
-PlotHD::PlotHD(QWidget *parent) : QWidget(parent)
+//------------------------------------------------------------------------------
+
+PlotHD::PlotHD(QWidget *parent)
+  :
+  QWidget(parent),
+  m_selected(false)
 {
   QVBoxLayout* lay = new QVBoxLayout(this);
   m_renderWidget = new QVTKWidget2(this);
   m_renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  m_renderWidget->installEventFilter(
+    new SelectPlotEventFilter(this));
 
   m_renderer = vtkSmartPointer<vtkRenderer>::New();
   m_renderer->SetBackground(1, .714, .757); // Background color green ffb6c1
@@ -66,16 +79,20 @@ PlotHD::PlotHD(QWidget *parent) : QWidget(parent)
   m_renderWidget->GetRenderWindow()->AddRenderer(m_renderer);
 }
 
+//------------------------------------------------------------------------------
+
 PlotHD::~PlotHD()
 {
 }
+
+//------------------------------------------------------------------------------
 
 void PlotHD::addGeometry(std::weak_ptr<Geometry> geom)
 {
   if( auto validGeom = geom.lock() )
   {
-    std::unique_ptr<GeometryRepresentation> geomRep =
-      std::unique_ptr<GeometryRepresentation>(new GeometryRepresentation());
+    std::shared_ptr<GeometryRepresentation> geomRep =
+      std::shared_ptr<GeometryRepresentation>(new GeometryRepresentation());
 
     geomRep->m_geometry = geom;
 
@@ -102,13 +119,20 @@ void PlotHD::addGeometry(std::weak_ptr<Geometry> geom)
 
 //        geomPartRep->setNofBands(5);
 
+        geomPartRep->setShowDataset(true);
+        geomPartRep->setShowDatasetLines(true);
+
         qApp->processEvents();
 
         geomRep->m_geometryParts.push_back(std::move(geomPartRep));
       }
     }
+
+    m_representations.push_back(std::move(geomRep));
   }
 }
+
+//------------------------------------------------------------------------------
 
 bool PlotHD::checkPlotDeletion()
 {
@@ -128,3 +152,61 @@ bool PlotHD::checkPlotDeletion()
 
   return false;
 }
+
+//------------------------------------------------------------------------------
+
+bool PlotHD::isSelected() const
+{
+  return m_selected;
+}
+
+//------------------------------------------------------------------------------
+
+void PlotHD::selectPlot()
+{
+  if( m_selected )
+  {
+    return;
+  }
+
+
+  if( !m_selectedPlotActor )
+  {
+    m_selectedPlotActor = vtkSmartPointer<vtkTextActor>::New();
+    m_selectedPlotActor->SetInput( "A" );
+    m_selectedPlotActor->SetPosition2(15, 10);
+    m_selectedPlotActor->GetTextProperty()->SetFontSize(24);
+    m_selectedPlotActor->GetTextProperty()->BoldOn();
+    m_selectedPlotActor->GetTextProperty()->SetColor(0.0, 0.0, 0.0);
+    m_renderer->AddActor2D(m_selectedPlotActor);
+  }
+
+  m_selected = true;
+  m_selectedPlotActor->VisibilityOn();
+
+  emit unSelectAllPlotsBut(this);
+
+  m_renderWidget->update();
+}
+
+//------------------------------------------------------------------------------
+
+void PlotHD::unSelectPlot()
+{
+  if( !m_selected )
+  {
+    return;
+  }
+
+  m_selected = false;
+
+  if( m_selectedPlotActor )
+  {
+    m_selectedPlotActor->VisibilityOff();
+  }
+
+  m_renderWidget->update();
+}
+
+//------------------------------------------------------------------------------
+

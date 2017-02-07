@@ -42,7 +42,7 @@ class Geometry : public QObject
 {
   Q_OBJECT
 public:
-  explicit Geometry(QObject *parent = 0);
+  explicit Geometry(const QString& name, QObject* parent = 0);
   ~Geometry();
 
   void addPart(std::unique_ptr<GeometryPart> part);
@@ -51,7 +51,10 @@ public:
   QMap<QString, double*> getPointDatasetsInfo() const;
   QMap<QString, double*> getCellDatasetsInfo() const;
 
+  const QString& getName() const;
+
 protected:
+  const QString                        m_name;
   QMap<QString, double*>               m_pointDatasetsInfo;
   QMap<QString, double*>               m_cellDatasetsInfo;
   QList<std::shared_ptr<GeometryPart>> m_geomParts;

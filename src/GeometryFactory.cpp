@@ -73,12 +73,11 @@ std::unique_ptr<Geometry> createCubeGeometry()
   data->GetPointData()->AddArray(dataset);
 
   std::unique_ptr<Geometry> geom =
-    std::unique_ptr<Geometry>(new Geometry());
+    std::unique_ptr<Geometry>(new Geometry("Basic_Cube"));
 
   std::unique_ptr<GeometryPart> part =
-    std::unique_ptr<GeometryPart>(new GeometryPart());
+    std::unique_ptr<GeometryPart>(new GeometryPart("Cube_part"));
 
-  part->setPartName("Cube_part");
   part->setGeometryData(data);
 
   geom->addPart(std::move(part));

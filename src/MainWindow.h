@@ -40,7 +40,7 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  static MainWindow& GetWindowInstance();
+  static std::unique_ptr<MainWindow>& GetWindowInstance();
   virtual ~MainWindow();
 
   void removeAllPlots();
@@ -52,17 +52,18 @@ protected slots:
   void addGeometry();
   void removeGeometry();
   void showAboutDialog();
+  void updateActivePlot(PlotHD*);
 
 protected:
   MainWindow(QWidget* parent = 0);
   virtual void customEvent(QEvent*);
 
 private:
-  static MainWindow*                  m_winInstance;
+  static std::unique_ptr<MainWindow> m_winInstance;
 
-  Ui::MainWindow*                     m_ui;
-  QVector<std::shared_ptr<Geometry> > m_geomList;
-  QVector<PlotHD*>                    m_plotList;
+  Ui::MainWindow*                    m_ui;
+  QVector<std::shared_ptr<Geometry>> m_geomList;
+  QVector<std::shared_ptr<PlotHD>>   m_plotList;
 };
 
 #endif // MAINWINDOW_H

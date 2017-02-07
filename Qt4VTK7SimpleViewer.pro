@@ -43,7 +43,8 @@ SOURCES += \
   ./src/AboutDialog.cpp \
   ./src/GeometryPartRepresentation.cpp \
   ./src/GeometryPart.cpp \
-  ./src/GeometryFactory.cpp
+  ./src/GeometryFactory.cpp \
+    src/GeometryPropertiesDialog.cpp
 
 HEADERS  += \
   ./src/MainWindow.h \
@@ -53,11 +54,13 @@ HEADERS  += \
   ./src/AboutDialog.h \
   ./src/GeometryPartRepresentation.h \
   ./src/GeometryPart.h \
-  ./src/GeometryFactory.h
+  ./src/GeometryFactory.h \
+    src/GeometryPropertiesDialog.h
 
 FORMS    += \
   ./src/ui/MainWindow.ui \
-  ./src/ui/AboutDialog.ui
+  ./src/ui/AboutDialog.ui \
+    src/ui/GeometryPropertiesDialog.ui
 
 INCLUDEPATH += \
   $$(VTK_7_INCLUDE_PATH)
@@ -89,7 +92,9 @@ LIBS += \
   -lvtkInteractionStyle-7.1 \
   -lvtkRenderingCore-7.1 \
   -lvtkRenderingOpenGL2-7.1 \
+  -lvtkRenderingFreeType-7.1 \
   -lvtkalglib-7.1 \
+  -lvtkfreetype-7.1 \
   -lvtkglew-7.1 \
   -lvtkjpeg-7.1 \
   -lvtkmetaio-7.1 \
