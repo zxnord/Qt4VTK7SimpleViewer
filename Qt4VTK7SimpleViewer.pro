@@ -44,7 +44,8 @@ SOURCES += \
   ./src/GeometryPartRepresentation.cpp \
   ./src/GeometryPart.cpp \
   ./src/GeometryFactory.cpp \
-    src/GeometryPropertiesDialog.cpp
+    src/GeometryPropertiesDialog.cpp \
+    src/GeometrySettings.cpp
 
 HEADERS  += \
   ./src/MainWindow.h \
@@ -55,7 +56,8 @@ HEADERS  += \
   ./src/GeometryPartRepresentation.h \
   ./src/GeometryPart.h \
   ./src/GeometryFactory.h \
-    src/GeometryPropertiesDialog.h
+    src/GeometryPropertiesDialog.h \
+    src/GeometrySettings.h
 
 FORMS    += \
   ./src/ui/MainWindow.ui \

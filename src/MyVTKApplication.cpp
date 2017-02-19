@@ -24,6 +24,8 @@
 
 #include "MainWindow.h"
 
+//------------------------------------------------------------------------------
+
 MyVTKApplication::MyVTKApplication(int& argc, char** argv, bool isGUI) :
   QApplication(argc, argv, isGUI)
 {
@@ -32,14 +34,21 @@ MyVTKApplication::MyVTKApplication(int& argc, char** argv, bool isGUI) :
     this, SLOT(cleanPlotsOnExit()) );
 }
 
+//------------------------------------------------------------------------------
 
 MyVTKApplication::~MyVTKApplication()
 {
 }
+
+//------------------------------------------------------------------------------
 
 void MyVTKApplication::cleanPlotsOnExit()
 {
   std::unique_ptr<MainWindow>& win = MainWindow::GetWindowInstance();
   win->removeAllPlots();
   win->removeAllGeometries();
+
+  win.reset();
 }
+
+//------------------------------------------------------------------------------

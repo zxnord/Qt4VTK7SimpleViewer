@@ -37,13 +37,15 @@
 
 //------------------------------------------------------------------------------
 
+const QString InvalidPartName = "InvalidName";
+
+//------------------------------------------------------------------------------
+
 GeometryPartRepresentation::GeometryPartRepresentation(
   std::weak_ptr<GeometryPart> geomPart,
-  vtkWeakPointer<vtkRenderer> ren,
   QObject* parent)
   :
   QObject(parent),
-  m_renderer(ren),
   m_geomPart(geomPart),
   m_solidColor(QColor(Qt::gray)),
   m_contoursColor(QColor(Qt::black)),
@@ -61,14 +63,62 @@ GeometryPartRepresentation::GeometryPartRepresentation(
   m_datasetActor->VisibilityOff();
   m_datasetLinesActor->VisibilityOff();
 
-  if( m_renderer )
-  {
-    m_renderer->AddActor(m_solidActor);
-    m_renderer->AddActor(m_datasetActor);
-    m_renderer->AddActor(m_datasetLinesActor);
-  }
-
   updateSolidPartActor();
+}
+
+//------------------------------------------------------------------------------
+
+GeometryPartRepresentation::GeometryPartRepresentation(
+  GeometryPartRepresentation&& partRep)
+  :
+  QObject(partRep.parent()),
+  m_geomPart(partRep.m_geomPart),
+  m_solidColor(partRep.m_solidColor),
+  m_contoursColor(partRep.m_contoursColor),
+  m_nofBands(partRep.m_nofBands),
+  m_showSolid(partRep.m_showSolid),
+  m_showDataset(partRep.m_showDataset),
+  m_showDatasetLines(partRep.m_showDatasetLines),
+  m_modified(partRep.m_modified),
+  m_solidActor(partRep.m_solidActor),
+  m_datasetActor(partRep.m_datasetActor),
+  m_datasetLinesActor(partRep.m_datasetLinesActor)
+{
+  m_oldVisibility[0] = partRep.m_oldVisibility[0];
+  m_oldVisibility[1] = partRep.m_oldVisibility[1];
+  m_oldVisibility[2] = partRep.m_oldVisibility[2];
+}
+
+//------------------------------------------------------------------------------
+
+GeometryPartRepresentation& GeometryPartRepresentation::operator =(
+  GeometryPartRepresentation&& partRep)
+{
+  setParent(partRep.parent());
+
+  m_geomPart = partRep.m_geomPart;
+  m_solidColor = partRep.m_solidColor;
+  m_contoursColor = partRep.m_contoursColor;
+  m_nofBands = partRep.m_nofBands;
+  m_showSolid = partRep.m_showSolid;
+  m_showDataset = partRep.m_showDataset;
+  m_showDatasetLines = partRep.m_showDatasetLines;
+  m_modified = partRep.m_modified;
+  m_solidActor = partRep.m_solidActor;
+  m_datasetActor = partRep.m_datasetActor;
+  m_datasetLinesActor = partRep.m_datasetLinesActor;
+
+  m_oldVisibility[0] = partRep.m_oldVisibility[0];
+  m_oldVisibility[1] = partRep.m_oldVisibility[1];
+  m_oldVisibility[2] = partRep.m_oldVisibility[2];
+
+  return *this;
+}
+
+//------------------------------------------------------------------------------
+
+GeometryPartRepresentation::~GeometryPartRepresentation()
+{
 }
 
 //------------------------------------------------------------------------------
@@ -240,6 +290,26 @@ void GeometryPartRepresentation::updateDatasetPartActor()
 
 //------------------------------------------------------------------------------
 
+vtkSmartPointer<vtkActor>& GeometryPartRepresentation::getSolidActor()
+{
+  return m_solidActor;
+}
+
+//------------------------------------------------------------------------------
+
+vtkSmartPointer<vtkActor>& GeometryPartRepresentation::getDatasetActor()
+{
+  return m_datasetActor;
+}
+
+//------------------------------------------------------------------------------
+
+vtkSmartPointer<vtkActor>& GeometryPartRepresentation::getDatasetLinesActor()
+{
+  return m_datasetLinesActor;
+}
+
+//------------------------------------------------------------------------------
 
 const QPair<QString, double*>& GeometryPartRepresentation::getDatasetInfo() const
 {
@@ -270,6 +340,24 @@ const QColor& GeometryPartRepresentation::getContoursColor() const
 
 //------------------------------------------------------------------------------
 
+const QString& GeometryPartRepresentation::getPartName() const
+{
+  if( auto validPart = m_geomPart.lock() )
+  {
+    return validPart->getPartName();
+  }
+  return InvalidPartName;
+}
+
+//------------------------------------------------------------------------------
+
+bool GeometryPartRepresentation::isModified() const
+{
+  return m_modified;
+}
+
+//------------------------------------------------------------------------------
+
 bool GeometryPartRepresentation::isShowSolid() const
 {
   return m_showSolid;
@@ -296,10 +384,10 @@ void GeometryPartRepresentation::setDatasetInfo(
 {
   if( m_datasetInfo != info )
   {
+    delete m_datasetInfo.second;
+
     m_datasetInfo = info;
     m_modified = true;
-
-    qApp->postEvent(this, new QEvent(RedrawEvent));
   }
 }
 
@@ -311,8 +399,6 @@ void GeometryPartRepresentation::setNofBands(int nofBands)
   {
     m_nofBands = nofBands;
     m_modified = true;
-
-    qApp->postEvent(this, new QEvent(RedrawEvent));
   }
 }
 
@@ -324,8 +410,6 @@ void GeometryPartRepresentation::setSolidColor(const QColor& color)
   {
     m_solidColor = color;
     m_modified = true;
-
-    qApp->postEvent(this, new QEvent(RedrawEvent));
   }
 }
 
@@ -337,8 +421,6 @@ void GeometryPartRepresentation::setContoursColor(const QColor& color)
   {
     m_contoursColor = color;
     m_modified = true;
-
-    qApp->postEvent(this, new QEvent(RedrawEvent));
   }
 }
 
@@ -349,8 +431,6 @@ void GeometryPartRepresentation::setShowSolid(bool on)
   m_showSolid = on;
   m_showDataset = !on;
   m_modified = true;
-
-  qApp->postEvent(this, new QEvent(RedrawEvent));
 }
 
 //------------------------------------------------------------------------------
@@ -360,8 +440,6 @@ void GeometryPartRepresentation::setShowDataset(bool on)
   m_showDataset = on;
   m_showSolid = !on;
   m_modified = true;
-
-  qApp->postEvent(this, new QEvent(RedrawEvent));
 }
 
 //------------------------------------------------------------------------------
@@ -370,15 +448,13 @@ void GeometryPartRepresentation::setShowDatasetLines(bool on)
 {
   m_showDatasetLines = on;
   m_modified = true;
-
-  qApp->postEvent(this, new QEvent(RedrawEvent));
 }
 
 //------------------------------------------------------------------------------
 
 void GeometryPartRepresentation::customEvent(QEvent* ev)
 {
-  if( (ev->type() == RedrawEvent) && m_modified )
+  if( (ev->type() == UpdateActorsEvent) && m_modified )
   {
     m_modified = false;
 

@@ -35,6 +35,7 @@
 //Project Includes
 #include "AboutDialog.h"
 #include "Geometry.h"
+#include "GeometryPropertiesDialog.h"
 #include "GeometryFactory.h"
 #include "PlotHD.h"
 
@@ -45,9 +46,11 @@ std::unique_ptr<MainWindow> MainWindow::m_winInstance =
 
 //------------------------------------------------------------------------------
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
   QMainWindow(parent),
-  m_ui(new Ui::MainWindow)
+  m_ui(new Ui::MainWindow),
+  m_geomPropertiesDialog( std::unique_ptr<GeometryPropertiesDialog>(new
+    GeometryPropertiesDialog()) )
 {
   m_ui->setupUi(this);
 
@@ -72,6 +75,10 @@ MainWindow::MainWindow(QWidget *parent) :
   connect(
     m_ui->action_About, SIGNAL(triggered(bool)),
     this,               SLOT(showAboutDialog()));
+
+  connect(
+    m_ui->m_propertiesBtn, SIGNAL(pressed()),
+    this,                  SLOT(showPropertiesDialog()));
 
   addGeometry();
 
@@ -133,7 +140,8 @@ void MainWindow::addGeometry()
   std::unique_ptr<Geometry> geom =
     GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY);
 
-  m_geomList.append(std::shared_ptr<Geometry>(std::move(geom)));
+//  m_geomList.append( std::make_shared<Geometry>(std::move(geom.release())) );
+  m_geomList.append( std::shared_ptr<Geometry>(geom.release()) );
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
@@ -208,7 +216,7 @@ void MainWindow::removeAllPlots()
 
 void MainWindow::removeAllGeometries()
 {
-  for( auto geom : m_geomList )
+  for( auto& geom : m_geomList )
   {
     geom.reset();
   }
@@ -227,6 +235,19 @@ void MainWindow::showAboutDialog()
 
 //------------------------------------------------------------------------------
 
+void MainWindow::showPropertiesDialog()
+{
+  if( !m_geomPropertiesDialog )
+  {
+    m_geomPropertiesDialog = std::unique_ptr<GeometryPropertiesDialog>(
+      new GeometryPropertiesDialog());
+  }
+
+  m_geomPropertiesDialog->show();
+}
+
+//------------------------------------------------------------------------------
+
 void MainWindow::updateActivePlot(PlotHD* activePlt)
 {
   for( std::shared_ptr<PlotHD>& plt : m_plotList )
@@ -234,6 +255,11 @@ void MainWindow::updateActivePlot(PlotHD* activePlt)
     if( plt.get() != activePlt )
     {
       plt->unSelectPlot();
+    }
+    else if( m_geomPropertiesDialog )
+    {
+//      m_geomPropertiesDialog->setCurrentGeometryList(
+//        plt->getRepresentations());
     }
   }
 }

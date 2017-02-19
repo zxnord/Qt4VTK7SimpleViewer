@@ -48,8 +48,8 @@ public:
   void addPart(std::unique_ptr<GeometryPart> part);
   QList<std::weak_ptr<GeometryPart>> getParts() const;
 
-  QMap<QString, double*> getPointDatasetsInfo() const;
-  QMap<QString, double*> getCellDatasetsInfo() const;
+  const QMap<QString, double*>& getPointDatasetsInfo() const;
+  const QMap<QString, double*>& getCellDatasetsInfo() const;
 
   const QString& getName() const;
 

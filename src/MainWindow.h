@@ -29,6 +29,7 @@
 #include <memory>
 
 class Geometry;
+class GeometryPropertiesDialog;
 class PlotHD;
 
 namespace Ui {
@@ -53,6 +54,7 @@ protected slots:
   void removeGeometry();
   void showAboutDialog();
   void updateActivePlot(PlotHD*);
+  void showPropertiesDialog();
 
 protected:
   MainWindow(QWidget* parent = 0);
@@ -64,6 +66,8 @@ private:
   Ui::MainWindow*                    m_ui;
   QVector<std::shared_ptr<Geometry>> m_geomList;
   QVector<std::shared_ptr<PlotHD>>   m_plotList;
+
+  std::unique_ptr<GeometryPropertiesDialog> m_geomPropertiesDialog;
 };
 
 #endif // MAINWINDOW_H

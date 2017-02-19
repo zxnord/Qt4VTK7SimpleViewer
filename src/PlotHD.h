@@ -37,6 +37,7 @@ class vtkRenderer;
 class vtkTextActor;
 
 class GeometryPartRepresentation;
+class GeometrySettings;
 
 struct GeometryRepresentation
 {
@@ -54,7 +55,7 @@ public:
 
   void addGeometry(std::weak_ptr<Geometry> geom);
 
-  std::vector<std::weak_ptr<GeometryRepresentation>> getRepresentations() const;
+  std::vector<std::weak_ptr<GeometrySettings>> getRepresentations() const;
 
   bool checkPlotDeletion();
   bool isSelected() const;
@@ -69,7 +70,7 @@ public slots:
 protected:
   bool m_selected;
 
-  std::vector<std::shared_ptr<GeometryRepresentation>> m_representations;
+  std::vector<std::shared_ptr<GeometrySettings>> m_geomSettings;
 
   vtkSmartPointer<vtkTextActor> m_selectedPlotActor;
   QVTKWidget2*                  m_renderWidget;

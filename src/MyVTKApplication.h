@@ -26,6 +26,8 @@
 #include <QApplication>
 #include <QObject>
 
+//------------------------------------------------------------------------------
+
 class MyVTKApplication : public QApplication
 {
   Q_OBJECT
@@ -36,5 +38,7 @@ public:
 protected slots:
   void cleanPlotsOnExit();
 };
+
+//------------------------------------------------------------------------------
 
 #endif // MYVTKAPPLICATION_H

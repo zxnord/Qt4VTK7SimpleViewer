@@ -114,14 +114,14 @@ QList<std::weak_ptr<GeometryPart>> Geometry::getParts() const
 
 //------------------------------------------------------------------------------
 
-QMap<QString, double*> Geometry::getPointDatasetsInfo() const
+const QMap<QString, double*>& Geometry::getPointDatasetsInfo() const
 {
   return m_pointDatasetsInfo;
 }
 
 //------------------------------------------------------------------------------
 
-QMap<QString, double*> Geometry::getCellDatasetsInfo() const
+const QMap<QString, double*>& Geometry::getCellDatasetsInfo() const
 {
   return m_cellDatasetsInfo;
 }

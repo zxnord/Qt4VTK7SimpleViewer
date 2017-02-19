@@ -51,6 +51,7 @@
 #include "Geometry.h"
 #include "GeometryPart.h"
 #include "GeometryPartRepresentation.h"
+#include "GeometrySettings.h"
 #include "MainWindow.h"
 
 VTK_MODULE_INIT(vtkRenderingOpenGL2)
@@ -89,66 +90,38 @@ PlotHD::~PlotHD()
 
 void PlotHD::addGeometry(std::weak_ptr<Geometry> geom)
 {
-  if( auto validGeom = geom.lock() )
+  if( geom.expired() )
   {
-    std::shared_ptr<GeometryRepresentation> geomRep =
-      std::shared_ptr<GeometryRepresentation>(new GeometryRepresentation());
-
-    geomRep->m_geometry = geom;
-
-    for( auto part : validGeom->getParts() )
-    {
-      if( auto validPart = part.lock() )
-      {
-        auto geomPartRep = std::unique_ptr<GeometryPartRepresentation>(
-          new GeometryPartRepresentation(
-            validPart,
-            m_renderer.Get(),
-            this));
-
-        QPair<QString, double*> info;
-        info.first = "TestField";
-        info.second = new double[2] {0.0, 0.0};
-
-        info.second[0] = validGeom->getPointDatasetsInfo()[info.first][0];
-        info.second[1] = validGeom->getPointDatasetsInfo()[info.first][1];
-
-        geomPartRep->setDatasetInfo(info);
-
-//        geomPartRep->setSolidColor(QColor(Qt::red));
-
-//        geomPartRep->setNofBands(5);
-
-        geomPartRep->setShowDataset(true);
-        geomPartRep->setShowDatasetLines(true);
-
-        qApp->processEvents();
-
-        geomRep->m_geometryParts.push_back(std::move(geomPartRep));
-      }
-    }
-
-    m_representations.push_back(std::move(geomRep));
+    return;
   }
+
+  std::shared_ptr<GeometrySettings> geomRep =
+//    std::make_shared<GeometrySettings>( geom );
+    std::make_shared<GeometrySettings>( GeometrySettings(geom) );
+  geomRep->registerToUpdate(this);
+
+  geomRep->addGeometryActorsToRenderer(m_renderer);
+
+  m_geomSettings.push_back( std::move(geomRep) );
 }
 
 //------------------------------------------------------------------------------
 
 bool PlotHD::checkPlotDeletion()
 {
-  unsigned int expiredGeoms = 0;
+//  unsigned int expiredGeoms = 0;
 
-  for( auto& rep : m_representations )
-  {
-    expiredGeoms += rep->m_geometry.expired()? 1 : 0;
-  }
+//  for( auto& rep : m_representations )
+//  {
+//    expiredGeoms += rep->m_geometry.expired()? 1 : 0;
+//  }
 
-  if( m_representations.size() == expiredGeoms )
-  {
-    delete this;
-    //    this->deleteLater();
-    return true;
-  }
+//  if( m_representations.size() == expiredGeoms )
+//  {
+//    delete this;
+//    //    this->deleteLater();
+//    return true;
+//  }
 
   return false;
 }
@@ -210,3 +183,19 @@ void PlotHD::unSelectPlot()
 
 //------------------------------------------------------------------------------
 
+std::vector<std::weak_ptr<GeometrySettings> > PlotHD::getRepresentations() const
+{
+  std::vector<std::weak_ptr<GeometrySettings>> weakRepresentations;
+
+  for( auto& rep : m_geomSettings )
+  {
+    if( rep )
+    {
+      weakRepresentations.push_back(rep);
+    }
+  }
+
+  return weakRepresentations;
+}
+
+//------------------------------------------------------------------------------

@@ -42,16 +42,24 @@ public:
   explicit GeometryPropertiesDialog(QWidget* parent = 0);
   ~GeometryPropertiesDialog();
 
-  void setCurrentGeometryList(std::vector<std::weak_ptr<GeometryRepresentation>>&);
+  void setCurrentGeometryList(std::vector<std::weak_ptr<GeometryRepresentation>>);
 
 protected slots:
+  void onColorButtonPressed();
 //  void resetToDefault();
 
 private:
+  void initConnections();
   void updateUI(std::shared_ptr<GeometryRepresentation>&);
+  void updateSolidColorUI(const std::unique_ptr<GeometryPartRepresentation>&);
+  void updateDatasetsCombo(std::shared_ptr<Geometry>&);
+
+  std::shared_ptr<GeometryRepresentation>&& getActiveGeometry() const;
 
   Ui::GeometryPropertiesDialog* m_ui;
   std::vector<std::weak_ptr<GeometryRepresentation>> m_geometriesRepresentation;
+  QString m_activeGeometry;
+  QString m_activePart;
 };
 
 //------------------------------------------------------------------------------

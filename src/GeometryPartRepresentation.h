@@ -44,7 +44,7 @@ class GeometryPartRepresentation : public QObject
 {
   Q_OBJECT
 public:
-  static const QEvent::Type RedrawEvent = static_cast<QEvent::Type>(2000);
+  static const QEvent::Type UpdateActorsEvent = static_cast<QEvent::Type>(2000);
 
   Q_PROPERTY(int nofBands READ getNofBands WRITE setNofBands)
   Q_PROPERTY(QColor solidColor READ getSolidColor WRITE setSolidColor)
@@ -55,17 +55,25 @@ public:
 
   explicit GeometryPartRepresentation(
     std::weak_ptr<GeometryPart> geomPart,
-    vtkWeakPointer<vtkRenderer> ren,
     QObject* parent = 0 );
 
-  void updateSolidPartActor();
-  void updateDatasetPartActor();
+  GeometryPartRepresentation(GeometryPartRepresentation&&);
+
+  GeometryPartRepresentation& operator =(GeometryPartRepresentation&&);
+
+  virtual ~GeometryPartRepresentation();
+
+  vtkSmartPointer<vtkActor>& getSolidActor();
+  vtkSmartPointer<vtkActor>& getDatasetActor();
+  vtkSmartPointer<vtkActor>& getDatasetLinesActor();
 
   const QPair<QString, double*>& getDatasetInfo() const;
   int getNofBands() const;
   const QColor& getSolidColor() const;
   const QColor& getContoursColor() const;
+  const QString& getPartName() const;
 
+  bool isModified() const;
   bool isShowSolid() const;
   bool isShowDataset() const;
   bool isShowDatasetLines() const;
@@ -87,8 +95,9 @@ protected slots:
 
 protected:
   virtual void customEvent(QEvent *);
+  void updateSolidPartActor();
+  void updateDatasetPartActor();
 
-  vtkWeakPointer<vtkRenderer> m_renderer;
   std::weak_ptr<GeometryPart> m_geomPart;
 
   QPair<QString, double*> m_datasetInfo;
