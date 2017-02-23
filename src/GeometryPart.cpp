@@ -37,6 +37,12 @@ GeometryPart::GeometryPart(const QString& name)
 
 //------------------------------------------------------------------------------
 
+GeometryPart::~GeometryPart()
+{
+}
+
+//------------------------------------------------------------------------------
+
 vtkAlgorithmOutput* GeometryPart::getGeometryPort()
 {
   return m_inputFilter->GetOutputPort();

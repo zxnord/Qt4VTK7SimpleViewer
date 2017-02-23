@@ -28,6 +28,7 @@
 
 #include <vtkSmartPointer.h>
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -38,13 +39,15 @@ class vtkRenderer;
 
 class GeometrySettings : public QObject
 {
-  const QEvent::Type GeometryUpdated = QEvent::Type(5001);
-  const QEvent::Type GeometryDeleted = QEvent::Type(5002);
-
   Q_OBJECT
 
 public:
-  explicit GeometrySettings(std::weak_ptr<Geometry> geom, QObject* parent = 0);
+  static const QEvent::Type GeometryUpdated = QEvent::Type(5001);
+  static const QEvent::Type GeometryDeleted = QEvent::Type(5002);
+
+  explicit GeometrySettings(
+    const std::unique_ptr<Geometry>& geom,
+    QObject* parent = 0);
   GeometrySettings(GeometrySettings&&);
   virtual ~GeometrySettings();
 
@@ -78,14 +81,15 @@ signals:
 public slots:
 
 protected:
-  void createPartRepresentations(std::shared_ptr<Geometry>&&);
+  virtual void customEvent(QEvent*);
+  void createPartRepresentations();
   std::unique_ptr<GeometryPartRepresentation>& getGeometryPartByName(
     const QString&);
 
   std::vector<QObject*> m_toUpdate;
   std::vector<QObject*> m_toDelete;
 
-  std::weak_ptr<Geometry> m_geom;
+  std::reference_wrapper<const std::unique_ptr<Geometry>> m_geom;
   std::vector<std::unique_ptr<GeometryPartRepresentation>> m_geometryParts;
 };
 

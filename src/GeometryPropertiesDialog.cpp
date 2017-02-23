@@ -29,6 +29,7 @@
 
 #include "Geometry.h"
 #include "GeometryPartRepresentation.h"
+#include "GeometrySettings.h"
 
 //------------------------------------------------------------------------------
 
@@ -60,7 +61,7 @@ void GeometryPropertiesDialog::initConnections()
 //------------------------------------------------------------------------------
 
 void GeometryPropertiesDialog::setCurrentGeometryList(
-  std::vector<std::weak_ptr<GeometryRepresentation>> geometries)
+  std::vector<std::weak_ptr<GeometrySettings> > geometries)
 {
   if( geometries.empty() )
   {
@@ -69,71 +70,86 @@ void GeometryPropertiesDialog::setCurrentGeometryList(
 
   m_ui->m_geometriesCombo->clear();
 
-  m_geometriesRepresentation = geometries;
-  std::weak_ptr<GeometryRepresentation> mainGeom =
-    m_geometriesRepresentation[0];
+  m_geometriesSettings = geometries;
+  std::weak_ptr<GeometrySettings> mainGeom =
+    m_geometriesSettings[0];
 
-  for( auto weakGeomRep : m_geometriesRepresentation )
+  for( auto weakGeomSett : m_geometriesSettings )
   {
-    if( auto validGeomRep = weakGeomRep.lock() )
+    if( auto validGeomSett = weakGeomSett.lock() )
     {
-      if( auto validGeom = validGeomRep->m_geometry.lock() )
+      if( m_ui->m_geometriesCombo->count() == 0 )
       {
-        m_ui->m_geometriesCombo->addItem(validGeom->getName());
+        m_activeGeometry = validGeomSett->getGeometryName();
+        m_ui->m_geometriesCombo->addItem(m_activeGeometry);
+      }
+      else
+      {
+        m_ui->m_geometriesCombo->addItem(validGeomSett->getGeometryName());
       }
     }
   }
 
-  if( auto validGeomRep = mainGeom.lock() )
+  if( auto validGeomSett = mainGeom.lock() )
   {
-    if( validGeomRep->m_geometry.lock() )
-    {
-      updateUI(validGeomRep);
-    }
+    updateUI(std::move(validGeomSett));
   }
 }
 
 //------------------------------------------------------------------------------
 
-void GeometryPropertiesDialog::updateUI(
-  std::shared_ptr<GeometryRepresentation>& geom)
+void GeometryPropertiesDialog::updateUI(std::shared_ptr<GeometrySettings>&& geom)
 {
-  if( (geom->m_geometryParts.size() <= 0) || geom->m_geometry.expired() )
+  QStringList geomPartNames = geom->getGeometryPartsNames();
+
+  if( geomPartNames.size() <= 0 )
   {
     return;
   }
 
   m_ui->m_geometryPartsCombo->clear();
 
-  for( auto& geomPart : geom->m_geometryParts )
+  for( auto& geomPart : geomPartNames )
   {
-    m_ui->m_geometryPartsCombo->addItem(geomPart->getPartName());
+    if( m_ui->m_geometryPartsCombo->count() == 0 )
+    {
+      m_activePart = geomPart;
+      m_ui->m_geometryPartsCombo->addItem(m_activePart);
+    }
+    else
+    {
+      m_ui->m_geometryPartsCombo->addItem(geomPart);
+    }
   }
 
-  if( auto validGeom = geom->m_geometry.lock() )
-  {
-    updateDatasetsCombo( validGeom );
-  }
+//  updateDatasetsCombo( validGeom );
 
-  updateSolidColorUI( geom->m_geometryParts.at(0) );
+  updateSolidColorUI();
 }
 
 //------------------------------------------------------------------------------
 
-void GeometryPropertiesDialog::updateSolidColorUI(
-  const std::unique_ptr<GeometryPartRepresentation>& geomPartRep)
+void GeometryPropertiesDialog::updateSolidColorUI()
 {
+  QColor solidColor;
+
+  if( auto&& gs = getActiveGeometry() )
+  {
+    if( !gs->getGeometryPartSolidColor(m_activePart, solidColor) )
+    {
+      return;
+    }
+  }
+
   QPixmap pixmap(30, 30);
   QPainter painter(&pixmap);
   painter.setBrush(Qt::SolidPattern);
   painter.setPen(Qt::black);
   painter.drawRect(0, 0, 29, 29);
-  painter.fillRect(2, 2, 26, 26, geomPartRep->getSolidColor());
+  painter.fillRect(2, 2, 26, 26, solidColor);
   painter.end();
 
   m_ui->m_colorLabel->setPixmap(pixmap);
-
-  m_activePart = geomPartRep->getPartName();
 }
 
 //------------------------------------------------------------------------------
@@ -157,7 +173,7 @@ void GeometryPropertiesDialog::updateDatasetsCombo(std::shared_ptr<Geometry>& ge
 
 void GeometryPropertiesDialog::onColorButtonPressed()
 {
-  std::shared_ptr<GeometryRepresentation>&& activeGeom =
+  std::shared_ptr<GeometrySettings> activeGeom =
     getActiveGeometry();
 
   if( !activeGeom )
@@ -165,50 +181,45 @@ void GeometryPropertiesDialog::onColorButtonPressed()
     return;
   }
 
-  for( auto& geomPartRep : activeGeom->m_geometryParts )
-  {
-    if( geomPartRep->getPartName() == m_ui->m_geometryPartsCombo->currentText() )
-    {
-      QColor solidColor = QColorDialog::getColor(
-        geomPartRep->getSolidColor(),
-        nullptr,
-        "Select Solid Color");
+  QColor oldSolidColor;
 
-      geomPartRep->setSolidColor(solidColor);
-      updateSolidColorUI(geomPartRep);
-    }
+  if( !activeGeom->getGeometryPartSolidColor(m_activePart, oldSolidColor) )
+  {
+    return;
   }
 
-//  if()
+  QColor solidColor = QColorDialog::getColor(
+    oldSolidColor,
+    nullptr,
+    "Select Solid Color");
+
+  activeGeom->setGeometryPartSolidColor(m_activePart, solidColor);
 }
 
 //------------------------------------------------------------------------------
 
-std::shared_ptr<GeometryRepresentation>&&
+std::shared_ptr<GeometrySettings>
   GeometryPropertiesDialog::getActiveGeometry() const
 {
-  std::shared_ptr<GeometryRepresentation> invalid;
+  std::shared_ptr<GeometrySettings> invalid;
 
-  if( m_geometriesRepresentation.empty() )
+  if( m_geometriesSettings.empty() )
   {
-    return std::move( invalid );
+    return invalid;
   }
 
-  for( auto weakRep : m_geometriesRepresentation )
+  for( auto weakRep : m_geometriesSettings )
   {
-    if( auto validRepresentation = weakRep.lock() )
+    if( auto validSettings = weakRep.lock() )
     {
-      if( auto validGeometry = validRepresentation->m_geometry.lock() )
+      if( validSettings->getGeometryName() == m_activeGeometry )
       {
-        if( validGeometry->getName() == m_ui->m_geometriesCombo->currentText() )
-        {
-          return std::move( validRepresentation );
-        }
+        return validSettings;
       }
     }
   }
 
-  return std::move( invalid );
+  return invalid;
 }
 
 //------------------------------------------------------------------------------

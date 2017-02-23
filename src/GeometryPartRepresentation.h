@@ -34,6 +34,7 @@
 #include <vtkWeakPointer.h>
 
 #include <memory>
+#include <functional>
 
 class vtkActor;
 class vtkRenderer;
@@ -54,7 +55,7 @@ public:
   Q_PROPERTY(bool showDatasetLines READ isShowDatasetLines WRITE setShowDatasetLines)
 
   explicit GeometryPartRepresentation(
-    std::weak_ptr<GeometryPart> geomPart,
+    const std::unique_ptr<GeometryPart>& geomPart,
     QObject* parent = 0 );
 
   GeometryPartRepresentation(GeometryPartRepresentation&&);
@@ -98,7 +99,7 @@ protected:
   void updateSolidPartActor();
   void updateDatasetPartActor();
 
-  std::weak_ptr<GeometryPart> m_geomPart;
+  std::reference_wrapper<const std::unique_ptr<GeometryPart>> m_geomPart;
 
   QPair<QString, double*> m_datasetInfo;
   QColor  m_solidColor;

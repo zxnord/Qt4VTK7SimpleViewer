@@ -102,7 +102,7 @@ void MainWindow::addPlot()
 
   m_ui->m_plotsWidget->layout()->addWidget(m_plotList.last().get());
 
-  if( m_geomList.isEmpty() )
+  if( m_geomList.empty() )
   {
     addGeometry();
   }
@@ -111,7 +111,7 @@ void MainWindow::addPlot()
     m_plotList.last().get(), SIGNAL(unSelectAllPlotsBut(PlotHD*)),
     this,                    SLOT(updateActivePlot(PlotHD*)) );
 
-  m_plotList.last()->addGeometry(m_geomList.last());
+  m_plotList.last()->addGeometry(m_geomList.back());
   m_plotList.last()->selectPlot();
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
@@ -137,11 +137,14 @@ void MainWindow::removePlot()
 
 void MainWindow::addGeometry()
 {
-  std::unique_ptr<Geometry> geom =
-    GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY);
+//  std::unique_ptr<Geometry> geom =
+//    GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY);
 
 //  m_geomList.append( std::make_shared<Geometry>(std::move(geom.release())) );
-  m_geomList.append( std::shared_ptr<Geometry>(geom.release()) );
+//  m_geomList.append( std::shared_ptr<Geometry>(geom.release()) );
+
+  m_geomList.push_back(
+    GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY) );
 
 //  vtkDebugLeaks::PrintCurrentLeaks();
 }
@@ -150,13 +153,13 @@ void MainWindow::addGeometry()
 
 void MainWindow::removeGeometry()
 {
-  if( m_geomList.isEmpty() )
+  if( m_geomList.empty() )
   {
     std::cout << "No more geometries left!!!" << std::endl;
     return;
   }
 
-  m_geomList.last().reset();
+  m_geomList.back().reset();
   m_geomList.pop_back();
 
   QVector<std::shared_ptr<PlotHD>> newPlotList;
@@ -258,8 +261,8 @@ void MainWindow::updateActivePlot(PlotHD* activePlt)
     }
     else if( m_geomPropertiesDialog )
     {
-//      m_geomPropertiesDialog->setCurrentGeometryList(
-//        plt->getRepresentations());
+      m_geomPropertiesDialog->setCurrentGeometryList(
+        plt->getRepresentations());
     }
   }
 }

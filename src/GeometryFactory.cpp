@@ -25,10 +25,15 @@
 #include "GeometryPart.h"
 
 #include <vtkAlgorithmOutput.h>
+#include <vtkCubeSource.h>
 #include <vtkDoubleArray.h>
+#include <vtkGlyph3D.h>
+#include <vtkLineSource.h>
+#include <vtkPoints.h>
 #include <vtkPointData.h>
 #include <vtkPolyData.h>
-#include <vtkCubeSource.h>
+#include <vtkSphereSource.h>
+#include <vtkTubeFilter.h>
 
 //------------------------------------------------------------------------------
 
@@ -80,7 +85,7 @@ std::unique_ptr<Geometry> createCubeGeometry()
 
   part->setGeometryData(data);
 
-  geom->addPart(std::move(part));
+  geom->addPart( part );
   return geom;
 }
 
@@ -141,12 +146,82 @@ std::unique_ptr<Geometry> createCubeGeometry()
 
 //------------------------------------------------------------------------------
 
+std::unique_ptr<Geometry> createCubeAtomGeometry()
+{
+  double datasetPoints[] {
+    0.0, 1.0, 1.0, 0.0,
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 1.0, 0.0,
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 1.0, 0.0,
+    1.0, 0.0, 0.0, 1.0,
+  };
+
+  // Create cube points
+  vtkSmartPointer<vtkPoints> cubePoints =
+    vtkSmartPointer<vtkPoints>::New();
+
+  cubePoints->InsertNextPoint(0.5, 0.5, 0.5);
+  cubePoints->InsertNextPoint(-0.5, 0.5, 0.5);
+  cubePoints->InsertNextPoint(-0.5, -0.5, 0.5);
+  cubePoints->InsertNextPoint(0.5, -0.5, 0.5);
+  cubePoints->InsertNextPoint(0.5, 0.5, -0.5);
+  cubePoints->InsertNextPoint(-0.5, 0.5, -0.5);
+  cubePoints->InsertNextPoint(-0.5, -0.5, -0.5);
+  cubePoints->InsertNextPoint(0.5, -0.5, -0.5);
+
+  vtkSmartPointer<vtkDoubleArray> dataset =
+      vtkSmartPointer<vtkDoubleArray>::New();
+  dataset->SetName("TestField");
+  dataset->SetNumberOfTuples(24);
+
+  for(vtkIdType i = 0; i < 24; ++i)
+  {
+    dataset->SetTuple1(i, datasetPoints[i]);
+  }
+
+  // Create a sphere
+  vtkSmartPointer<vtkSphereSource> sphereSource =
+    vtkSmartPointer<vtkSphereSource>::New();
+  sphereSource->SetRadius(0.1);
+  sphereSource->SetPhiResolution(20);
+  sphereSource->SetThetaResolution(20);
+
+  vtkSmartPointer<vtkGlyph3D> glyph =
+    vtkSmartPointer<vtkGlyph3D>::New();
+
+
+  vtkSmartPointer<vtkPolyData> data =
+    vtkSmartPointer<vtkPolyData>::New();
+
+  data->SetPoints(cubePoints);
+  data->GetPointData()->AddArray(dataset);
+  glyph->SetInputData( data );
+  glyph->SetSourceConnection(sphereSource->GetOutputPort());
+
+  std::unique_ptr<Geometry> geom =
+    std::unique_ptr<Geometry>(new Geometry("Basic_Cube"));
+
+  std::unique_ptr<GeometryPart> part =
+    std::unique_ptr<GeometryPart>(new GeometryPart("Cube_part"));
+
+  part->setGeometryConnection( glyph->GetOutputPort() );
+
+  geom->addPart( part );
+  return geom;
+}
+
+//------------------------------------------------------------------------------
+
 std::unique_ptr<Geometry> GeometryFactory::CreateBasicGeometry(
   BasicGeometries type)
 {
   switch (type)
   {
     case CUBE_GEOMETRY:
+      return createCubeAtomGeometry();
+
+    case CUBE_ATOM_GEOMETRY:
       return createCubeGeometry();
 
     case SPHERE_GEOMETRY: // Not implemented yet

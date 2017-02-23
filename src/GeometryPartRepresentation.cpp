@@ -20,7 +20,7 @@
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
 
-#include "GeometryPartRepresentation.h"
+#include "./src/GeometryPartRepresentation.h"
 
 #include "GeometryPart.h"
 #include "MyVTKApplication.h"
@@ -37,12 +37,8 @@
 
 //------------------------------------------------------------------------------
 
-const QString InvalidPartName = "InvalidName";
-
-//------------------------------------------------------------------------------
-
 GeometryPartRepresentation::GeometryPartRepresentation(
-  std::weak_ptr<GeometryPart> geomPart,
+  const std::unique_ptr<GeometryPart>& geomPart,
   QObject* parent)
   :
   QObject(parent),
@@ -125,17 +121,12 @@ GeometryPartRepresentation::~GeometryPartRepresentation()
 
 void GeometryPartRepresentation::updateSolidPartActor()
 {
-  if( m_geomPart.expired() )
-  {
-    return;
-  }
-
   m_datasetActor->VisibilityOff();
 
   vtkSmartPointer<vtkGeometryFilter> gFilter =
     vtkSmartPointer<vtkGeometryFilter>::New();
 
-  gFilter->SetInputConnection(m_geomPart.lock()->getGeometryPort());
+  gFilter->SetInputConnection(m_geomPart.get()->getGeometryPort());
 
   vtkSmartPointer<vtkPolyDataMapper> mapper =
     vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -159,30 +150,23 @@ void GeometryPartRepresentation::updateSolidPartActor()
 
 void GeometryPartRepresentation::updateDatasetPartActor()
 {
-  if( m_geomPart.expired() )
-  {
-    return;
-  }
-
-  auto validPart = m_geomPart.lock();
-
   if( m_showDataset )
   {
     vtkSmartPointer<vtkGeometryFilter> gFilter;
 
-    if( vtkUnstructuredGrid::SafeDownCast(validPart->getGeometryData()) )
+    if( vtkUnstructuredGrid::SafeDownCast(m_geomPart.get()->getGeometryData()) )
     {
       gFilter =
         vtkSmartPointer<vtkGeometryFilter>::New();
 
-      gFilter->SetInputConnection(validPart->getGeometryPort());
+      gFilter->SetInputConnection(m_geomPart.get()->getGeometryPort());
     }
 
 
     vtkSmartPointer<vtkAssignAttribute> assigner =
       vtkSmartPointer<vtkAssignAttribute>::New();
 
-    if( validPart->getGeometryData()->GetPointData()
+    if( m_geomPart.get()->getGeometryData()->GetPointData()
       ->HasArray(qPrintable(m_datasetInfo.first)) )
     {
       if( gFilter )
@@ -191,7 +175,7 @@ void GeometryPartRepresentation::updateDatasetPartActor()
       }
       else
       {
-        assigner->SetInputConnection(validPart->getGeometryPort());
+        assigner->SetInputConnection(m_geomPart.get()->getGeometryPort());
       }
 
       assigner->Assign(
@@ -199,7 +183,7 @@ void GeometryPartRepresentation::updateDatasetPartActor()
         vtkDataSetAttributes::SCALARS,
         vtkAssignAttribute::POINT_DATA);
     }
-    else if( validPart->getGeometryData()->GetCellData()
+    else if( m_geomPart.get()->getGeometryData()->GetCellData()
       ->HasArray(qPrintable(m_datasetInfo.first)) )
     {
       if( gFilter )
@@ -208,7 +192,7 @@ void GeometryPartRepresentation::updateDatasetPartActor()
       }
       else
       {
-        assigner->SetInputConnection(validPart->getGeometryPort());
+        assigner->SetInputConnection(m_geomPart.get()->getGeometryPort());
       }
 
       assigner->Assign(
@@ -342,11 +326,7 @@ const QColor& GeometryPartRepresentation::getContoursColor() const
 
 const QString& GeometryPartRepresentation::getPartName() const
 {
-  if( auto validPart = m_geomPart.lock() )
-  {
-    return validPart->getPartName();
-  }
-  return InvalidPartName;
+  return m_geomPart.get()->getPartName();
 }
 
 //------------------------------------------------------------------------------

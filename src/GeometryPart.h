@@ -34,6 +34,7 @@ class GeometryPart
 {
 public:
   GeometryPart(const QString& name);
+  virtual ~GeometryPart();
 
   vtkAlgorithmOutput* getGeometryPort();
   vtkDataSet* getGeometryData();

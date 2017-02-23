@@ -27,6 +27,7 @@
 #include <QVector>
 
 #include <memory>
+#include <vector>
 
 class Geometry;
 class GeometryPropertiesDialog;
@@ -63,9 +64,9 @@ protected:
 private:
   static std::unique_ptr<MainWindow> m_winInstance;
 
-  Ui::MainWindow*                    m_ui;
-  QVector<std::shared_ptr<Geometry>> m_geomList;
-  QVector<std::shared_ptr<PlotHD>>   m_plotList;
+  Ui::MainWindow*                        m_ui;
+  std::vector<std::unique_ptr<Geometry>> m_geomList;
+  QVector<std::shared_ptr<PlotHD>>       m_plotList;
 
   std::unique_ptr<GeometryPropertiesDialog> m_geomPropertiesDialog;
 };

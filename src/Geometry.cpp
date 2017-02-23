@@ -82,7 +82,7 @@ Geometry::~Geometry()
 
 //------------------------------------------------------------------------------
 
-void Geometry::addPart(std::unique_ptr<GeometryPart> part)
+void Geometry::addPart(std::unique_ptr<GeometryPart>& part)
 {
   if( !part )
   {
@@ -95,21 +95,23 @@ void Geometry::addPart(std::unique_ptr<GeometryPart> part)
   fillDatasetMap(pData, m_pointDatasetsInfo);
   fillDatasetMap(cData, m_cellDatasetsInfo);
 
-  m_geomParts << std::shared_ptr<GeometryPart>(std::move(part));
+  m_geomParts.push_back( std::move(part) );
 }
 
 //------------------------------------------------------------------------------
 
-QList<std::weak_ptr<GeometryPart>> Geometry::getParts() const
+const std::vector<std::unique_ptr<GeometryPart>>& Geometry::getParts() const
 {
-  QList<std::weak_ptr<GeometryPart>> parts;
+//  std::vector<std::unique_ptr<GeometryPart>&> parts;
 
-  for( auto sPart : m_geomParts )
-  {
-    parts << sPart;
-  }
+//  for( std::unique_ptr<GeometryPart>& sPart : m_geomParts )
+//  {
+//    parts.push_back( sPart );
+//  }
 
-  return parts;
+//  return parts;
+
+  return m_geomParts;
 }
 
 //------------------------------------------------------------------------------

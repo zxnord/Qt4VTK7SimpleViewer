@@ -33,6 +33,7 @@ class GeometryFactory
 public:
   enum BasicGeometries {
     CUBE_GEOMETRY,
+    CUBE_ATOM_GEOMETRY,
     SPHERE_GEOMETRY
   };
 

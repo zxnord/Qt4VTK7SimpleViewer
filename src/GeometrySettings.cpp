@@ -35,16 +35,13 @@ std::unique_ptr<GeometryPartRepresentation> InvalidPartRepresentation;
 //------------------------------------------------------------------------------
 
 GeometrySettings::GeometrySettings(
-  std::weak_ptr<Geometry> geom,
+  const std::unique_ptr<Geometry>& geom,
   QObject* parent)
   :
   QObject(parent),
   m_geom(geom)
 {
-  if( auto validGeom = m_geom.lock() )
-  {
-    createPartRepresentations(std::move(validGeom));
-  }
+  createPartRepresentations();
 }
 
 //------------------------------------------------------------------------------
@@ -65,21 +62,19 @@ GeometrySettings::~GeometrySettings()
 
 //------------------------------------------------------------------------------
 
-void GeometrySettings::createPartRepresentations(std::shared_ptr<Geometry>&& geom)
+void GeometrySettings::createPartRepresentations()
 {
-  for( auto part : geom->getParts() )
+  for( auto& part : m_geom.get()->getParts() )
   {
-    if( auto validPart = part.lock() )
-    {
-      auto geomPartRep = std::unique_ptr<GeometryPartRepresentation>(
-        new GeometryPartRepresentation( validPart ));
+//    auto geomPartRep = std::unique_ptr<GeometryPartRepresentation>(
+//      new GeometryPartRepresentation( part ));
 
 //        QPair<QString, double*> info;
 //        info.first = "TestField";
 //        info.second = new double[2] {0.0, 0.0};
 
-//        info.second[0] = validGeom->getPointDatasetsInfo()[info.first][0];
-//        info.second[1] = validGeom->getPointDatasetsInfo()[info.first][1];
+//        info.second[0] = geom->getPointDatasetsInfo()[info.first][0];
+//        info.second[1] = geom->getPointDatasetsInfo()[info.first][1];
 
 //        geomPartRep->setDatasetInfo(info);
 
@@ -90,10 +85,11 @@ void GeometrySettings::createPartRepresentations(std::shared_ptr<Geometry>&& geo
 //        geomPartRep->setShowDataset(true);
 //        geomPartRep->setShowDatasetLines(true);
 
-//        qApp->processEvents();
+////        qApp->processEvents();
 
-      m_geometryParts.push_back(std::move(geomPartRep));
-    }
+//    m_geometryParts.push_back(std::move(geomPartRep));
+    m_geometryParts.push_back( std::unique_ptr<GeometryPartRepresentation>(
+      new GeometryPartRepresentation( part )) );
   }
 }
 
@@ -144,12 +140,7 @@ void GeometrySettings::registerToDelete(QObject* obj)
 
 const QString& GeometrySettings::getGeometryName() const
 {
-  if( auto validGeom = m_geom.lock() )
-  {
-    return validGeom->getName();
-  }
-
-  return InvalidGeomName;
+  return m_geom.get()->getName();
 }
 
 //------------------------------------------------------------------------------
@@ -309,7 +300,23 @@ bool GeometrySettings::setGeometryPartSolidColor(
   }
 
   geomPart->setSolidColor(color);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    QEvent ev(GeometryPartRepresentation::UpdateActorsEvent);
+    MyVTKApplication::instance()->sendEvent(
+     geomPart.get(),
+     &ev );
+
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated),
+     1000);
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -327,7 +334,17 @@ bool GeometrySettings::setGeometryPartDatasetLinesColor(
   }
 
   geomPart->setContoursColor(color);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated) );
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -345,7 +362,17 @@ bool GeometrySettings::setGeometryPartShowSolid(
   }
 
   geomPart->setShowSolid(show);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated) );
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -363,7 +390,17 @@ bool GeometrySettings::setGeometryPartShowDataset(
   }
 
   geomPart->setShowDataset(show);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated) );
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -381,7 +418,17 @@ bool GeometrySettings::setGeometryPartShowDatasetLines(
   }
 
   geomPart->setShowDatasetLines(show);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated) );
+
+    return true;
+  }
+
+  return false;
 }
 
 //------------------------------------------------------------------------------
@@ -399,7 +446,34 @@ bool GeometrySettings::setGeometryPartNofDatasetLines(
   }
 
   geomPart->setNofBands(nofLines);
-  return geomPart->isModified();
+
+  if( geomPart->isModified() )
+  {
+    MyVTKApplication::instance()->postEvent(
+     this,
+     new QEvent(GeometryUpdated) );
+
+    return true;
+  }
+
+  return false;
+}
+
+//------------------------------------------------------------------------------
+
+void GeometrySettings::customEvent(QEvent* ev)
+{
+  if( ev->type() == GeometryUpdated )
+  {
+    for( auto obj : m_toUpdate )
+    {
+      MyVTKApplication::instance()->postEvent(
+        obj,
+        new QEvent(GeometryUpdated));
+    }
+  }
+
+  return QObject::customEvent(ev);
 }
 
 //------------------------------------------------------------------------------

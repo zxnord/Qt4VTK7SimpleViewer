@@ -53,7 +53,7 @@ public:
   explicit PlotHD(QWidget *parent = 0);
   virtual ~PlotHD();
 
-  void addGeometry(std::weak_ptr<Geometry> geom);
+  void addGeometry(const std::unique_ptr<Geometry>& geom);
 
   std::vector<std::weak_ptr<GeometrySettings>> getRepresentations() const;
 
@@ -68,6 +68,8 @@ public slots:
   void selectPlot();
 
 protected:
+  virtual void customEvent(QEvent* ev);
+
   bool m_selected;
 
   std::vector<std::shared_ptr<GeometrySettings>> m_geomSettings;

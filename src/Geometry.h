@@ -30,6 +30,7 @@
 #include <vtkSmartPointer.h>
 
 #include <memory>
+#include <vector>
 
 class vtkAlgorithmOutput;
 class vtkDoubleArray;
@@ -45,8 +46,8 @@ public:
   explicit Geometry(const QString& name, QObject* parent = 0);
   ~Geometry();
 
-  void addPart(std::unique_ptr<GeometryPart> part);
-  QList<std::weak_ptr<GeometryPart>> getParts() const;
+  void addPart(std::unique_ptr<GeometryPart>& part);
+  const std::vector<std::unique_ptr<GeometryPart> >& getParts() const;
 
   const QMap<QString, double*>& getPointDatasetsInfo() const;
   const QMap<QString, double*>& getCellDatasetsInfo() const;
@@ -57,7 +58,7 @@ protected:
   const QString                        m_name;
   QMap<QString, double*>               m_pointDatasetsInfo;
   QMap<QString, double*>               m_cellDatasetsInfo;
-  QList<std::shared_ptr<GeometryPart>> m_geomParts;
+  std::vector<std::unique_ptr<GeometryPart>> m_geomParts;
 };
 
 #endif // GEOMETRY_H

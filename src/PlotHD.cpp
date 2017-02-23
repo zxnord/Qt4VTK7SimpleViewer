@@ -88,16 +88,11 @@ PlotHD::~PlotHD()
 
 //------------------------------------------------------------------------------
 
-void PlotHD::addGeometry(std::weak_ptr<Geometry> geom)
+void PlotHD::addGeometry(const std::unique_ptr<Geometry>& geom)
 {
-  if( geom.expired() )
-  {
-    return;
-  }
-
   std::shared_ptr<GeometrySettings> geomRep =
-//    std::make_shared<GeometrySettings>( geom );
-    std::make_shared<GeometrySettings>( GeometrySettings(geom) );
+    std::make_shared<GeometrySettings>( geom );
+//    std::make_shared<GeometrySettings>( GeometrySettings(geom) );
   geomRep->registerToUpdate(this);
 
   geomRep->addGeometryActorsToRenderer(m_renderer);
@@ -196,6 +191,20 @@ std::vector<std::weak_ptr<GeometrySettings> > PlotHD::getRepresentations() const
   }
 
   return weakRepresentations;
+}
+
+//------------------------------------------------------------------------------
+
+void PlotHD::customEvent(QEvent* ev)
+{
+  if( ev->type() == GeometrySettings::GeometryUpdated )
+  {
+    m_renderWidget->update();
+    update();
+    return;
+  }
+
+  return QObject::customEvent(ev);
 }
 
 //------------------------------------------------------------------------------
