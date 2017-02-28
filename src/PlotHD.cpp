@@ -54,9 +54,10 @@
 #include "GeometrySettings.h"
 #include "MainWindow.h"
 
-VTK_MODULE_INIT(vtkRenderingOpenGL2)
+VTK_MODULE_INIT(vtkDomainsChemistryOpenGL2)
 VTK_MODULE_INIT(vtkInteractionStyle)
 VTK_MODULE_INIT(vtkRenderingFreeType)
+VTK_MODULE_INIT(vtkRenderingOpenGL2)
 
 //------------------------------------------------------------------------------
 

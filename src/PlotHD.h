@@ -36,14 +36,7 @@ class QVTKWidget2;
 class vtkRenderer;
 class vtkTextActor;
 
-class GeometryPartRepresentation;
 class GeometrySettings;
-
-struct GeometryRepresentation
-{
-  std::weak_ptr<Geometry>                                  m_geometry;
-  std::vector<std::unique_ptr<GeometryPartRepresentation>> m_geometryParts;
-};
 
 class PlotHD : public QWidget
 {

@@ -24,7 +24,9 @@
 #include <vtkRenderer.h>
 
 #include "Geometry.h"
+#include "GeometryPartMolecule.h"
 #include "GeometryPartRepresentation.h"
+#include "GeometryPartMoleculeRepresentation.h"
 #include "MyVTKApplication.h"
 
 //------------------------------------------------------------------------------
@@ -88,8 +90,16 @@ void GeometrySettings::createPartRepresentations()
 ////        qApp->processEvents();
 
 //    m_geometryParts.push_back(std::move(geomPartRep));
-    m_geometryParts.push_back( std::unique_ptr<GeometryPartRepresentation>(
-      new GeometryPartRepresentation( part )) );
+    if( dynamic_cast<GeometryPartMolecule*>(part.get()) )
+    {
+      m_geometryParts.push_back( std::unique_ptr<GeometryPartMoleculeRepresentation>(
+        new GeometryPartMoleculeRepresentation( part )) );
+    }
+    else
+    {
+      m_geometryParts.push_back( std::unique_ptr<GeometryPartRepresentation>(
+        new GeometryPartRepresentation( part )) );
+    }
   }
 }
 

@@ -19,50 +19,62 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
-#ifndef GEOMETRYPROPERTIESDIALOG_H
-#define GEOMETRYPROPERTIESDIALOG_H
+#include "GeometryPartMoleculeRepresentation.h"
 
-#include <QDialog>
+#include "GeometryPartMolecule.h"
 
-#include "PlotHD.h"
+#include <vtkActor.h>
+#include <vtkMolecule.h>
+#include <vtkMoleculeMapper.h>
 
 //------------------------------------------------------------------------------
 
-namespace Ui {
-  class GeometryPropertiesDialog;
+GeometryPartMoleculeRepresentation::GeometryPartMoleculeRepresentation(
+  const std::unique_ptr<GeometryPart>& part)
+  :
+  GeometryPartRepresentation(part)
+{
+  m_datasetActor = vtkSmartPointer<vtkActor>();
+  m_datasetLinesActor = vtkSmartPointer<vtkActor>();
+
+  updateMoleculeActor();
+  m_modified = true;
 }
 
 //------------------------------------------------------------------------------
 
-class GeometryPropertiesDialog : public QDialog
+void GeometryPartMoleculeRepresentation::updateMoleculeActor()
 {
-  Q_OBJECT
+  m_solidActor->VisibilityOff();
 
-public:
-  explicit GeometryPropertiesDialog(QWidget* parent = 0);
-  ~GeometryPropertiesDialog();
+  vtkSmartPointer<vtkMoleculeMapper> molMapper =
+    vtkSmartPointer<vtkMoleculeMapper>::New();
 
-  void setCurrentGeometryList(std::vector<std::weak_ptr<GeometrySettings>>);
+  molMapper->SetInputData( static_cast<GeometryPartMolecule*>(
+    m_geomPart.get().get())->getMoleculeData() );
+//  molMapper->UseFastSettings();
+  molMapper->UseBallAndStickSettings();
+//  molMapper->UseVDWSpheresSettings();
+//  molMapper->UseLiquoriceStickSettings();
+  molMapper->UseMultiCylindersForBondsOn();
+  molMapper->SetAtomicRadiusScaleFactor(0.1);
+  molMapper->SetBondRadius(0.04);
 
-protected slots:
-  void onColorButtonPressed();
-  void onGeometryPartComboBoxChanged(QString);
-//  void resetToDefault();
-
-private:
-  void initConnections();
-  void updateUI(std::shared_ptr<GeometrySettings>&&);
-  void updateSolidColorUI();
-  void updateDatasetsCombo(std::shared_ptr<Geometry>&);
-
-  std::shared_ptr<GeometrySettings> getActiveGeometry() const;
-
-  Ui::GeometryPropertiesDialog* m_ui;
-  std::vector<std::weak_ptr<GeometrySettings>> m_geometriesSettings;
-  QString m_activeGeometry;
-  QString m_activePart;
-};
+  m_solidActor->SetMapper(molMapper);
+  m_solidActor->VisibilityOn();
+}
 
 //------------------------------------------------------------------------------
 
-#endif // GEOMETRYPROPERTIESDIALOG_H
+void GeometryPartMoleculeRepresentation::customEvent(QEvent* ev)
+{
+  if( (ev->type() == UpdateActorsEvent) && m_modified )
+  {
+    m_modified = false;
+    updateMoleculeActor();
+  }
+
+  QObject::customEvent(ev);
+}
+
+//------------------------------------------------------------------------------

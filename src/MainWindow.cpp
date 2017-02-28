@@ -27,6 +27,7 @@
 #include <iostream>
 
 //Qt Includes
+#include <QAction>
 #include <QHBoxLayout>
 
 //VTK Includes
@@ -66,7 +67,15 @@ MainWindow::MainWindow(QWidget* parent) :
 
   connect(
     m_ui->actionCube, SIGNAL(triggered(bool)),
-    this,             SLOT(addGeometry()));
+    this,             SLOT(addBasicGeometry()));
+
+  connect(
+    m_ui->actionCube_Atom, SIGNAL(triggered(bool)),
+    this,                  SLOT(addBasicGeometry()));
+
+  connect(
+    m_ui->actionMolecule, SIGNAL(triggered(bool)),
+    this,                 SLOT(addBasicGeometry()));
 
 //  connect(
 //    m_ui->m_removeGeomBtn, SIGNAL(pressed()),
@@ -79,8 +88,6 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(
     m_ui->m_propertiesBtn, SIGNAL(pressed()),
     this,                  SLOT(showPropertiesDialog()));
-
-  addGeometry();
 
   addPlot();
 }
@@ -104,7 +111,8 @@ void MainWindow::addPlot()
 
   if( m_geomList.empty() )
   {
-    addGeometry();
+    m_geomList.push_back(
+      GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY) );
   }
 
   connect(
@@ -135,18 +143,24 @@ void MainWindow::removePlot()
 
 //------------------------------------------------------------------------------
 
-void MainWindow::addGeometry()
+void MainWindow::addBasicGeometry()
 {
-//  std::unique_ptr<Geometry> geom =
-//    GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY);
+  QObject* obj = sender();
 
-//  m_geomList.append( std::make_shared<Geometry>(std::move(geom.release())) );
-//  m_geomList.append( std::shared_ptr<Geometry>(geom.release()) );
+  GeometryFactory::BasicGeometries geom =
+    GeometryFactory::CUBE_GEOMETRY;
+
+  if( obj == m_ui->actionCube_Atom )
+  {
+    geom = GeometryFactory::CUBE_ATOM_GEOMETRY;
+  }
+  else if( obj == m_ui->actionMolecule )
+  {
+    geom = GeometryFactory::CUBE_GEOMETRY;
+  }
 
   m_geomList.push_back(
-    GeometryFactory::CreateBasicGeometry(GeometryFactory::CUBE_GEOMETRY) );
-
-//  vtkDebugLeaks::PrintCurrentLeaks();
+    GeometryFactory::CreateBasicGeometry( geom ) );
 }
 
 //------------------------------------------------------------------------------

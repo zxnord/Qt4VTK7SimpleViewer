@@ -56,6 +56,10 @@ void GeometryPropertiesDialog::initConnections()
   connect(
     m_ui->m_changeColorButton, SIGNAL(pressed()),
     this,                      SLOT(onColorButtonPressed()));
+
+  connect(
+    m_ui->m_geometryPartsCombo, SIGNAL(activated(QString)),
+    this,                       SLOT(onGeometryPartComboBoxChanged(QString)));
 }
 
 //------------------------------------------------------------------------------
@@ -194,6 +198,17 @@ void GeometryPropertiesDialog::onColorButtonPressed()
     "Select Solid Color");
 
   activeGeom->setGeometryPartSolidColor(m_activePart, solidColor);
+}
+
+//------------------------------------------------------------------------------
+
+void GeometryPropertiesDialog::onGeometryPartComboBoxChanged(QString partName)
+{
+  m_activePart = partName;
+
+//  updateDatasetsCombo();
+
+  updateSolidColorUI();
 }
 
 //------------------------------------------------------------------------------

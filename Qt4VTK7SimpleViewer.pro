@@ -44,8 +44,10 @@ SOURCES += \
   ./src/GeometryPartRepresentation.cpp \
   ./src/GeometryPart.cpp \
   ./src/GeometryFactory.cpp \
-    src/GeometryPropertiesDialog.cpp \
-    src/GeometrySettings.cpp
+  ./src/GeometryPropertiesDialog.cpp \
+  ./src/GeometrySettings.cpp \
+  ./src/GeometryPartMolecule.cpp \
+  ./src/GeometryPartMoleculeRepresentation.cpp
 
 HEADERS  += \
   ./src/MainWindow.h \
@@ -56,13 +58,15 @@ HEADERS  += \
   ./src/GeometryPartRepresentation.h \
   ./src/GeometryPart.h \
   ./src/GeometryFactory.h \
-    src/GeometryPropertiesDialog.h \
-    src/GeometrySettings.h
+  ./src/GeometryPropertiesDialog.h \
+  ./src/GeometrySettings.h \
+  ./src/GeometryPartMolecule.h \
+  ./src/GeometryPartMoleculeRepresentation.h
 
 FORMS    += \
   ./src/ui/MainWindow.ui \
   ./src/ui/AboutDialog.ui \
-    src/ui/GeometryPropertiesDialog.ui
+  ./src/ui/GeometryPropertiesDialog.ui
 
 INCLUDEPATH += \
   $$(VTK_7_INCLUDE_PATH)
@@ -78,6 +82,8 @@ LIBS += \
   -lvtkCommonMisc-7.1 \
   -lvtkCommonSystem-7.1 \
   -lvtkCommonTransforms-7.1 \
+  -lvtkDomainsChemistry-7.1 \
+  -lvtkDomainsChemistryOpenGL2-7.1 \
   -lvtkDICOMParser-7.1 \
   -lvtkFiltersCore-7.1 \
   -lvtkFiltersGeneral-7.1 \
@@ -88,7 +94,9 @@ LIBS += \
   -lvtkFiltersStatistics-7.1 \
   -lvtkGUISupportQt-7.1 \
   -lvtkGUISupportQtOpenGL-7.1 \
+  -lvtkIOCore-7.1 \
   -lvtkIOImage-7.1 \
+  -lvtkIOXMLParser-7.1 \
   -lvtkImagingCore-7.1 \
   -lvtkImagingFourier-7.1 \
   -lvtkInteractionStyle-7.1 \
@@ -96,6 +104,7 @@ LIBS += \
   -lvtkRenderingOpenGL2-7.1 \
   -lvtkRenderingFreeType-7.1 \
   -lvtkalglib-7.1 \
+  -lvtkexpat-7.1 \
   -lvtkfreetype-7.1 \
   -lvtkglew-7.1 \
   -lvtkjpeg-7.1 \

@@ -19,56 +19,19 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
+#ifndef GEOMETRYPARTMOLECULEREPRESENTATION_H
+#define GEOMETRYPARTMOLECULEREPRESENTATION_H
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "GeometryPartRepresentation.h"
 
-#include <QMainWindow>
-#include <QVector>
-
-#include <memory>
-#include <vector>
-
-class Geometry;
-class GeometryPropertiesDialog;
-class PlotHD;
-
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+class GeometryPartMoleculeRepresentation : public GeometryPartRepresentation
 {
-  Q_OBJECT
-
 public:
-  static std::unique_ptr<MainWindow>& GetWindowInstance();
-  virtual ~MainWindow();
-
-  void removeAllPlots();
-  void removeAllGeometries();
-
-protected slots:
-  void addPlot();
-  void removePlot();
-  void addBasicGeometry();
-  void removeGeometry();
-  void showAboutDialog();
-  void updateActivePlot(PlotHD*);
-  void showPropertiesDialog();
+  GeometryPartMoleculeRepresentation(const std::unique_ptr<GeometryPart>&);
 
 protected:
-  MainWindow(QWidget* parent = 0);
-  virtual void customEvent(QEvent*);
-
-private:
-  static std::unique_ptr<MainWindow> m_winInstance;
-
-  Ui::MainWindow*                        m_ui;
-  std::vector<std::unique_ptr<Geometry>> m_geomList;
-  QVector<std::shared_ptr<PlotHD>>       m_plotList;
-
-  std::unique_ptr<GeometryPropertiesDialog> m_geomPropertiesDialog;
+  virtual void customEvent(QEvent* ev);
+  void updateMoleculeActor();
 };
 
-#endif // MAINWINDOW_H
+#endif // GEOMETRYPARTMOLECULEREPRESENTATION_H

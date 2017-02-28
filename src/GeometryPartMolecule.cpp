@@ -19,56 +19,46 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
+#include "GeometryPartMolecule.h"
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include <vtkMolecule.h>
+#include <vtkPolyData.h>
 
-#include <QMainWindow>
-#include <QVector>
+//------------------------------------------------------------------------------
 
-#include <memory>
-#include <vector>
-
-class Geometry;
-class GeometryPropertiesDialog;
-class PlotHD;
-
-namespace Ui {
-class MainWindow;
+GeometryPartMolecule::GeometryPartMolecule(const QString& name)
+  :
+  GeometryPart(name),
+  m_moleculeData(vtkSmartPointer<vtkMolecule>::New())
+{
 }
 
-class MainWindow : public QMainWindow
+//------------------------------------------------------------------------------
+
+GeometryPartMolecule::~GeometryPartMolecule()
 {
-  Q_OBJECT
 
-public:
-  static std::unique_ptr<MainWindow>& GetWindowInstance();
-  virtual ~MainWindow();
+}
 
-  void removeAllPlots();
-  void removeAllGeometries();
+//------------------------------------------------------------------------------
 
-protected slots:
-  void addPlot();
-  void removePlot();
-  void addBasicGeometry();
-  void removeGeometry();
-  void showAboutDialog();
-  void updateActivePlot(PlotHD*);
-  void showPropertiesDialog();
+void GeometryPartMolecule::setMoleculeData(vtkMolecule* data)
+{
+  if( data )
+  {
+    m_moleculeData->DeepCopy(data);
 
-protected:
-  MainWindow(QWidget* parent = 0);
-  virtual void customEvent(QEvent*);
+    // Dummy data.
+    m_data = vtkSmartPointer<vtkPolyData>::New();
+    updateData();
+  }
+}
 
-private:
-  static std::unique_ptr<MainWindow> m_winInstance;
+//------------------------------------------------------------------------------
 
-  Ui::MainWindow*                        m_ui;
-  std::vector<std::unique_ptr<Geometry>> m_geomList;
-  QVector<std::shared_ptr<PlotHD>>       m_plotList;
+vtkMolecule* GeometryPartMolecule::getMoleculeData() const
+{
+  return m_moleculeData;
+}
 
-  std::unique_ptr<GeometryPropertiesDialog> m_geomPropertiesDialog;
-};
-
-#endif // MAINWINDOW_H
+//------------------------------------------------------------------------------

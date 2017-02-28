@@ -34,6 +34,7 @@ public:
   enum BasicGeometries {
     CUBE_GEOMETRY,
     CUBE_ATOM_GEOMETRY,
+    MOLECULE_GEOMETRY,
     SPHERE_GEOMETRY
   };
 
