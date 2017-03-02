@@ -298,6 +298,8 @@ void MainWindow::addGeometryFromFile()
 
   m_geomList.push_back(
     GeometryFactory::CreateGeometryFromFile( filename ) );
+
+  addPlot();
 }
 
 //------------------------------------------------------------------------------

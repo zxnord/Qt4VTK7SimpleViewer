@@ -32,6 +32,8 @@ class GeometryMoleculeAtomReader
 {
 public:
   static std::unique_ptr<Geometry> FromMolFile(const QString& filename);
+
+  static std::unique_ptr<Geometry> FromPolyFile(const QString& filename);
 };
 
 #endif // GEOMETRYMOLECULEATOMREADER_H

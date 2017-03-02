@@ -401,6 +401,10 @@ std::unique_ptr<Geometry> GeometryFactory::CreateGeometryFromFile(QString fileNa
   {
     return GeometryMoleculeAtomReader::FromMolFile(fileName);
   }
+  else if( ext.toUpper() == "PMOL" )
+  {
+    return GeometryMoleculeAtomReader::FromPolyFile(fileName);
+  }
 
   return std::unique_ptr<Geometry>();
 }
