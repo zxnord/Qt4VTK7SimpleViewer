@@ -28,6 +28,7 @@
 
 //Qt Includes
 #include <QAction>
+#include <QFileDialog>
 #include <QHBoxLayout>
 
 //VTK Includes
@@ -60,6 +61,10 @@ MainWindow::MainWindow(QWidget* parent) :
   connect(
     m_ui->actionNew_Plot, SIGNAL(triggered(bool)),
     this,                 SLOT(addPlot()));
+
+  connect(
+    m_ui->actionFrom_File, SIGNAL(triggered(bool)),
+    this,                  SLOT(addGeometryFromFile()) );
 
 //  connect(
 //    m_ui->m_removeBtn, SIGNAL(pressed()),
@@ -156,7 +161,7 @@ void MainWindow::addBasicGeometry()
   }
   else if( obj == m_ui->actionMolecule )
   {
-    geom = GeometryFactory::CUBE_GEOMETRY;
+    geom = GeometryFactory::MOLECULE_GEOMETRY;
   }
 
   m_geomList.push_back(
@@ -279,6 +284,20 @@ void MainWindow::updateActivePlot(PlotHD* activePlt)
         plt->getRepresentations());
     }
   }
+}
+
+//------------------------------------------------------------------------------
+
+void MainWindow::addGeometryFromFile()
+{
+  QString filename = QFileDialog::getOpenFileName(
+    0,
+    "Select Geometry File",
+    "./",
+    "*.mol");
+
+  m_geomList.push_back(
+    GeometryFactory::CreateGeometryFromFile( filename ) );
 }
 
 //------------------------------------------------------------------------------

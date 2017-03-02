@@ -22,8 +22,11 @@
 #include "GeometryFactory.h"
 
 #include "Geometry.h"
+#include "GeometryMoleculeAtomReader.h"
 #include "GeometryPart.h"
 #include "GeometryPartMolecule.h"
+
+#include <QStringList>
 
 #include <vtkAlgorithmOutput.h>
 #include <vtkAppendPolyData.h>
@@ -390,4 +393,16 @@ std::unique_ptr<Geometry> GeometryFactory::CreateBasicGeometry(
 
 //------------------------------------------------------------------------------
 
+std::unique_ptr<Geometry> GeometryFactory::CreateGeometryFromFile(QString fileName)
+{
+  QString ext = fileName.split('.').last();
 
+  if( ext.toUpper() == "MOL" )
+  {
+    return GeometryMoleculeAtomReader::FromMolFile(fileName);
+  }
+
+  return std::unique_ptr<Geometry>();
+}
+
+//------------------------------------------------------------------------------

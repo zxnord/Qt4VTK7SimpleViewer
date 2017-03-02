@@ -47,7 +47,8 @@ SOURCES += \
   ./src/GeometryPropertiesDialog.cpp \
   ./src/GeometrySettings.cpp \
   ./src/GeometryPartMolecule.cpp \
-  ./src/GeometryPartMoleculeRepresentation.cpp
+  ./src/GeometryPartMoleculeRepresentation.cpp \
+    src/GeometryMoleculeAtomReader.cpp
 
 HEADERS  += \
   ./src/MainWindow.h \
@@ -61,7 +62,8 @@ HEADERS  += \
   ./src/GeometryPropertiesDialog.h \
   ./src/GeometrySettings.h \
   ./src/GeometryPartMolecule.h \
-  ./src/GeometryPartMoleculeRepresentation.h
+  ./src/GeometryPartMoleculeRepresentation.h \
+    src/GeometryMoleculeAtomReader.h
 
 FORMS    += \
   ./src/ui/MainWindow.ui \

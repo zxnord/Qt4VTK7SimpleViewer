@@ -56,9 +56,9 @@ void GeometryPartMoleculeRepresentation::updateMoleculeActor()
   molMapper->UseBallAndStickSettings();
 //  molMapper->UseVDWSpheresSettings();
 //  molMapper->UseLiquoriceStickSettings();
-  molMapper->UseMultiCylindersForBondsOn();
-  molMapper->SetAtomicRadiusScaleFactor(0.1);
-  molMapper->SetBondRadius(0.04);
+//  molMapper->UseMultiCylindersForBondsOn();
+//  molMapper->SetAtomicRadiusScaleFactor(0.1);
+//  molMapper->SetBondRadius(0.04);
 
   m_solidActor->SetMapper(molMapper);
   m_solidActor->VisibilityOn();

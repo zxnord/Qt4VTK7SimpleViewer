@@ -19,57 +19,19 @@
 // FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
 // IN THE SOFTWARE.
 //------------------------------------------------------------------------------
+#ifndef GEOMETRYMOLECULEATOMREADER_H
+#define GEOMETRYMOLECULEATOMREADER_H
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
-#include <QMainWindow>
-#include <QVector>
+#include <QString>
 
 #include <memory>
-#include <vector>
 
 class Geometry;
-class GeometryPropertiesDialog;
-class PlotHD;
 
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+class GeometryMoleculeAtomReader
 {
-  Q_OBJECT
-
 public:
-  static std::unique_ptr<MainWindow>& GetWindowInstance();
-  virtual ~MainWindow();
-
-  void removeAllPlots();
-  void removeAllGeometries();
-
-protected slots:
-  void addPlot();
-  void removePlot();
-  void addBasicGeometry();
-  void addGeometryFromFile();
-  void removeGeometry();
-  void showAboutDialog();
-  void updateActivePlot(PlotHD*);
-  void showPropertiesDialog();
-
-protected:
-  MainWindow(QWidget* parent = 0);
-  virtual void customEvent(QEvent*);
-
-private:
-  static std::unique_ptr<MainWindow> m_winInstance;
-
-  Ui::MainWindow*                        m_ui;
-  std::vector<std::unique_ptr<Geometry>> m_geomList;
-  QVector<std::shared_ptr<PlotHD>>       m_plotList;
-
-  std::unique_ptr<GeometryPropertiesDialog> m_geomPropertiesDialog;
+  static std::unique_ptr<Geometry> FromMolFile(const QString& filename);
 };
 
-#endif // MAINWINDOW_H
+#endif // GEOMETRYMOLECULEATOMREADER_H
