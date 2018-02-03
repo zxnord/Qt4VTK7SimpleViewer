@@ -23,8 +23,14 @@
 #include "MainWindow.h"
 #include "MyVTKApplication.h"
 
+#include <QSurfaceFormat>
+
+#include <QVTKOpenGLWidget.h>
+
 int main(int argc, char** argv)
-{
+{  
+  QSurfaceFormat::setDefaultFormat(QVTKOpenGLWidget::defaultFormat());
+
   MyVTKApplication a(argc, argv);
   MainWindow& w = MainWindow::GetWindowInstance();
   w.show();

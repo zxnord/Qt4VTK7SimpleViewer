@@ -38,7 +38,7 @@
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
 
-#include <QVTKWidget2.h>
+#include <QVTKOpenGLWidget.h>
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -54,7 +54,12 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 PlotHD::PlotHD(QWidget *parent) : QWidget(parent)
 {
   QVBoxLayout* lay = new QVBoxLayout(this);
-  m_renderWidget = new QVTKWidget2(this);
+
+  vtkSmartPointer<vtkGenericOpenGLRenderWindow> window =
+    vtkSmartPointer<vtkGenericOpenGLRenderWindow>::New();
+
+  m_renderWidget = new QVTKOpenGLWidget(this);
+  m_renderWidget->SetRenderWindow(window);
   m_renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_renderer = vtkSmartPointer<vtkRenderer>::New();
