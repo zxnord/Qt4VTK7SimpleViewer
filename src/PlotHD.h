@@ -31,7 +31,7 @@
 
 class Geometry;
 
-class QVTKWidget2;
+class QVTKWidget;
 class vtkRenderer;
 
 class GeometryPartRepresentation;
@@ -60,7 +60,7 @@ public slots:
 protected:
   std::vector<std::unique_ptr<GeometryRepresentation>> m_representations;
 
-  QVTKWidget2* m_renderWidget;
+  QVTKWidget* m_renderWidget;
   vtkSmartPointer<vtkRenderer> m_renderer;
 };
 

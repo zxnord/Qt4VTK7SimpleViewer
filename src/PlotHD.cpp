@@ -30,15 +30,15 @@
 #include <vtkContourFilter.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkInteractorStyle.h>
-#include <vtkTDxInteractorStyleCamera.h>
-#include <vtkTDxInteractorStyleSettings.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkTDxInteractorStyleCamera.h>
+#include <vtkTDxInteractorStyleSettings.h>
 
-#include <QVTKWidget2.h>
+#include <QVTKWidget.h>
 
 #include <QApplication>
 #include <QVBoxLayout>
@@ -54,7 +54,7 @@ VTK_MODULE_INIT(vtkInteractionStyle)
 PlotHD::PlotHD(QWidget *parent) : QWidget(parent)
 {
   QVBoxLayout* lay = new QVBoxLayout(this);
-  m_renderWidget = new QVTKWidget2(this);
+  m_renderWidget = new QVTKWidget(this);
   m_renderWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_renderer = vtkSmartPointer<vtkRenderer>::New();

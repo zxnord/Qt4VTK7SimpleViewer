@@ -82,7 +82,7 @@ LIBS += \
   -lvtkFiltersSources-7.1 \
   -lvtkFiltersStatistics-7.1 \
   -lvtkGUISupportQt-7.1 \
-  -lvtkGUISupportQtOpenGL-7.1 \
+#  -lvtkGUISupportQtOpenGL-7.1 \
   -lvtkIOImage-7.1 \
   -lvtkImagingCore-7.1 \
   -lvtkImagingFourier-7.1 \
@@ -90,10 +90,10 @@ LIBS += \
   -lvtkRenderingCore-7.1 \
   -lvtkRenderingOpenGL2-7.1 \
   -lvtkalglib-7.1 \
-  -lvtkglew-7.1 \
-  -lvtkjpeg-7.1 \
+#  -lvtkglew-7.1 \
+#  -lvtkjpeg-7.1 \
   -lvtkmetaio-7.1 \
-  -lvtkpng-7.1 \
+#  -lvtkpng-7.1 \
   -lvtksys-7.1 \
-  -lvtktiff-7.1 \
-  -lvtkzlib-7.1
+#  -lvtktiff-7.1 \
+#  -lvtkzlib-7.1
